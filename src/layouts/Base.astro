@@ -1,0 +1,30 @@
+---
+import '@fontsource/cinzel/latin-500.css';
+import '@fontsource/cinzel/latin-600.css';
+import '@fontsource/cormorant-garamond/latin-500.css';
+import '@fontsource/cormorant-garamond/latin-500-italic.css';
+import '@fontsource/cormorant-garamond/latin-600.css';
+import '@fontsource/cormorant-garamond/latin-600-italic.css';
+import '@fontsource/inter/latin-400.css';
+import '@fontsource/inter/latin-500.css';
+import '@fontsource/inter/latin-600.css';
+import '../styles/global.css';
+const title = 'Lorenzo Tripodi — Star Map';
+const description = 'Portfolio of Lorenzo Tripodi, software developer from Turin: every project is a constellation.';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta name="theme-color" content="#0A1233" />
+    <link rel="icon" type="image/svg+xml" href={import.meta.env.BASE_URL.replace(/\/?$/, '/') + 'favicon.svg'} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
