@@ -8,6 +8,11 @@ const { href, class: className } = Astro.props;
 const external = href.startsWith('http');
 ---
 
-<a class={className} href={href} target={external ? '_blank' : undefined} rel={external ? 'noopener' : undefined}>
+<a
+  class={className}
+  href={href}
+  target={external ? '_blank' : undefined}
+  rel={external ? 'noopener noreferrer' : undefined}
+>
   <slot />
 </a>

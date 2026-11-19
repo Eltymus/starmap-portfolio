@@ -62,3 +62,22 @@ test.describe('Content-Security-Policy', () => {
     expect(violations).toEqual([]);
   });
 });
+
+test('external links open in a new tab without opener or referrer', async ({ page }) => {
+  await page.goto('./');
+  // The chart-sheet pages live in <template>s until opened: check those links too.
+  const links = await page.evaluate(() =>
+    [document, ...[...document.querySelectorAll('template')].map((template) => template.content)].flatMap((root) =>
+      [...root.querySelectorAll<HTMLAnchorElement>('a[href^="http"]')].map((a) => ({
+        href: a.href,
+        target: a.target,
+        rel: a.rel
+      }))
+    )
+  );
+  expect(links.length).toBeGreaterThan(0);
+  for (const link of links) {
+    expect(link, link.href).toMatchObject({ target: '_blank' });
+    expect(link.rel.split(' '), link.href).toEqual(expect.arrayContaining(['noopener', 'noreferrer']));
+  }
+});
