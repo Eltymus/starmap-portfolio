@@ -38,7 +38,9 @@ export function startStarMap(): void {
       state.hoveredNote = hover;
       showStarTip(hover);
     },
-    onStart: () => setTimeout(() => intro.classList.add('is-done'), INTRO_HOLD)
+    onStart: () => setTimeout(() => intro.classList.add('is-done'), INTRO_HOLD),
+    // A stable signal for tests and tooling that every engraving is in place.
+    onArtReady: () => document.documentElement.setAttribute('data-art-ready', '')
   });
 
   window.addEventListener('click', (event) => {

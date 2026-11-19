@@ -19,6 +19,8 @@ export interface SkySceneOptions {
   onHover: (hover: HoveredNote | null) => void;
   /** Called once, after the first frame has been rendered. */
   onStart: () => void;
+  /** Called once the engravings have been drawn (they also back the chart sheet and the full map). */
+  onArtReady?: () => void;
 }
 
 const UP = new THREE.Vector3(0, 1, 0);
@@ -54,7 +56,7 @@ const createAdaptiveResolution = (renderer: THREE.WebGLRenderer, getSize: () => 
   };
 };
 
-export const startSkyScene = ({ canvas, coordsElement, onHover, onStart }: SkySceneOptions): void => {
+export const startSkyScene = ({ canvas, coordsElement, onHover, onStart, onArtReady }: SkySceneOptions): void => {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: false,
@@ -96,6 +98,7 @@ export const startSkyScene = ({ canvas, coordsElement, onHover, onStart }: SkySc
       constellation.setArt(artTexture, createConstellationLabelTexture(CHAPTERS[i].name, CHAPTERS[i].subtitle));
     });
     paintStarNames();
+    onArtReady?.();
   };
   const imagesReady = loadEngravingImages();
   if (document.fonts && document.fonts.load)

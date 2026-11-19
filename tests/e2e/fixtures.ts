@@ -1,9 +1,10 @@
 import { expect, type Page } from '@playwright/test';
 
-/** Opens the page and waits until the intro splash has gone and the fonts are ready. */
+/** Opens the page and waits until the intro has gone, the engravings are drawn and the fonts are ready. */
 export const openStarMap = async (page: Page) => {
   await page.goto('./');
   await expect(page.locator('#intro')).toHaveClass(/is-done/, { timeout: 15_000 });
+  await expect(page.locator('html')).toHaveAttribute('data-art-ready', '', { timeout: 15_000 });
   await page.evaluate(() => document.fonts.ready);
 };
 
