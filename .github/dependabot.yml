@@ -31,6 +31,9 @@ updates:
       # Bumped by hand, together with the container image in .github/workflows/ci.yml and the
       # Linux screenshot baselines (`npm run test:e2e:linux -- --update-snapshots`): a new browser renders differently.
       - dependency-name: '@playwright/test'
+      # Types follow the Node version the site runs on (.nvmrc), not the newest Node.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
