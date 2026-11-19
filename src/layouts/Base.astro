@@ -9,6 +9,9 @@ import '@fontsource/inter/latin-400.css';
 import '@fontsource/inter/latin-500.css';
 import '@fontsource/inter/latin-600.css';
 import '../styles/global.css';
+// The two faces the intro and the first chapter are set in: fetched at once instead of after the CSS.
+import cinzel600 from '@fontsource/cinzel/files/cinzel-latin-600-normal.woff2?url';
+import cormorant500Italic from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-italic.woff2?url';
 import { assetUrl } from '../lib/assets';
 import { COLORS } from '../lib/theme';
 
@@ -21,6 +24,8 @@ const description = 'Portfolio of Lorenzo Tripodi, software developer from Turin
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" href={cinzel600} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={cormorant500Italic} as="font" type="font/woff2" crossorigin />
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />

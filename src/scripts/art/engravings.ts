@@ -16,13 +16,13 @@ import {
 } from './canvas';
 
 const IMAGE_FILES = {
-  mole: 'img/mole.png',
-  computer: 'img/computer.png',
-  grapes: 'img/grapes.png',
-  book: 'img/book.png',
-  icosahedron: 'img/icosahedron.png',
-  stairs: 'img/stairs.png',
-  bird: 'img/bird.png'
+  mole: 'img/mole.webp',
+  computer: 'img/computer.webp',
+  grapes: 'img/grapes.webp',
+  book: 'img/book.webp',
+  icosahedron: 'img/icosahedron.webp',
+  stairs: 'img/stairs.webp',
+  bird: 'img/bird.webp'
 } as const;
 
 type ImageKey = keyof typeof IMAGE_FILES;
