@@ -14,7 +14,10 @@
   height: min(88dvh, 900px);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+
+  /* clip, not hidden: a hidden box is still a scroll container, and focusing or scrolling to a footer
+     button while the sheet animates in would shift the whole page inside the frame. */
+  overflow: clip;
   background: radial-gradient(120% 80% at 50% 0%, #14225a 0%, var(--navy) 60%, #08102c 100%);
   border: 1px solid var(--line);
   outline: 1px solid var(--line-faint);
