@@ -1,7 +1,9 @@
 const OPEN_CLASS = 'is-open';
 
-const tabbableElements = (root) => [...root.querySelectorAll('button:not([disabled]), a[href], [tabindex="0"]')]
-  .filter((element) => element.getClientRects().length && getComputedStyle(element).visibility !== 'hidden');
+const tabbableElements = (root) =>
+  [...root.querySelectorAll('button:not([disabled]), a[href], [tabindex="0"]')].filter(
+    (element) => element.getClientRects().length && getComputedStyle(element).visibility !== 'hidden'
+  );
 
 export const createDialog = (root, initialFocus) => {
   let isOpen = false;
@@ -20,7 +22,13 @@ export const createDialog = (root, initialFocus) => {
     root.classList.remove(OPEN_CLASS);
     root.setAttribute('aria-hidden', 'true');
     isOpen = false;
-    if (root.contains(document.activeElement) && returnFocus && returnFocus.isConnected && returnFocus !== document.body) returnFocus.focus({ preventScroll: true });
+    if (
+      root.contains(document.activeElement) &&
+      returnFocus &&
+      returnFocus.isConnected &&
+      returnFocus !== document.body
+    )
+      returnFocus.focus({ preventScroll: true });
     returnFocus = null;
   };
 

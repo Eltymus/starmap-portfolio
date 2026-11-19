@@ -12,9 +12,24 @@ const shadowOffset = 18 * light;
 const waxing = phase < 4 ? -1 : 1;
 const maskId = 'moon-mask-' + phase;
 ---
+
 <svg viewBox="-4 -4 30 30" aria-hidden="true">
-  <defs><mask id={maskId}><rect x="-4" y="-4" width="30" height="30" fill="white" /><circle cx={11 + waxing * shadowOffset} cy="11" r="9" fill="black" /></mask></defs>
-  <circle class="moon-orbit" cx="11" cy="11" r="13.5" fill="none" stroke={GOLD} stroke-width=".8" stroke-dasharray="1.5 2.5" />
+  <defs>
+    <mask id={maskId}>
+      <rect x="-4" y="-4" width="30" height="30" fill="white" />
+      <circle cx={11 + waxing * shadowOffset} cy="11" r="9" fill="black" />
+    </mask>
+  </defs>
+  <circle
+    class="moon-orbit"
+    cx="11"
+    cy="11"
+    r="13.5"
+    fill="none"
+    stroke={GOLD}
+    stroke-width=".8"
+    stroke-dasharray="1.5 2.5"
+  />
   <circle cx="11" cy="11" r="9" fill="none" stroke={GOLD} stroke-width="1" />
   {phase === 4 && <circle cx="11" cy="11" r="9" fill={GOLD} />}
   {phase !== 4 && phase !== 0 && <circle cx="11" cy="11" r="9" fill={GOLD} mask={`url(#${maskId})`} />}

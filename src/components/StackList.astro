@@ -5,4 +5,12 @@ interface Props {
 
 const { groups } = Astro.props;
 ---
-<div class="stack-list">{groups.map(([label, tools]) => <span><b>{label}</b>{tools}</span>)}</div>
+
+<div class="stack-list">
+  {groups.map(([label, tools]) => (
+    <span>
+      <b>{label}</b>
+      {tools}
+    </span>
+  ))}
+</div>

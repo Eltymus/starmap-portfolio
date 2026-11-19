@@ -5,4 +5,9 @@ interface Props {
 
 const { items } = Astro.props;
 ---
-<div class="chips">{items.map((item) => <span>{item}</span>)}</div>
+
+<div class="chips">
+  {items.map((item) => (
+    <span>{item}</span>
+  ))}
+</div>

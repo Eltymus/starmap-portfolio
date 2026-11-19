@@ -31,17 +31,24 @@ export const createNavigation = ({ onChapterChange }) => {
   moonButtons.forEach((button, i) => {
     button.onclick = () => goTo(i);
   });
-  document.querySelectorAll('[data-go]').forEach((button) => button.addEventListener('click', () => goTo(+button.dataset.go)));
+  document
+    .querySelectorAll('[data-go]')
+    .forEach((button) => button.addEventListener('click', () => goTo(+button.dataset.go)));
 
-  scroller.addEventListener('scroll', () => {
-    state.scrollProgress = scroller.scrollTop / Math.max(1, scroller.clientHeight);
-    setActive(Math.round(state.scrollProgress));
-    progressFill.style.height = (state.scrollProgress / (CHAPTER_COUNT - 1) * 100) + '%';
-  }, { passive: true });
+  scroller.addEventListener(
+    'scroll',
+    () => {
+      state.scrollProgress = scroller.scrollTop / Math.max(1, scroller.clientHeight);
+      setActive(Math.round(state.scrollProgress));
+      progressFill.style.height = (state.scrollProgress / (CHAPTER_COUNT - 1)) * 100 + '%';
+    },
+    { passive: true }
+  );
 
   setActive(0);
 
-  const step = (direction) => goTo(direction > 0 ? Math.min(CHAPTER_COUNT - 1, state.activeChapter + 1) : Math.max(0, state.activeChapter - 1));
+  const step = (direction) =>
+    goTo(direction > 0 ? Math.min(CHAPTER_COUNT - 1, state.activeChapter + 1) : Math.max(0, state.activeChapter - 1));
 
   return { goTo, step };
 };

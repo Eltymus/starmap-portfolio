@@ -7,7 +7,12 @@ export const createShootingStar = (scene) => {
   const geometry = new THREE.BufferGeometry();
   geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(6), 3));
   geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array([0, 0, 0, 1, 0.9, 0.7]), 3));
-  const material = new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0, blending: THREE.AdditiveBlending });
+  const material = new THREE.LineBasicMaterial({
+    vertexColors: true,
+    transparent: true,
+    opacity: 0,
+    blending: THREE.AdditiveBlending
+  });
   scene.add(new THREE.Line(geometry, material));
 
   let current = null;
@@ -15,8 +20,15 @@ export const createShootingStar = (scene) => {
 
   return (time, dt, viewDirection) => {
     if (!current && time > nextAt) {
-      const origin = viewDirection.clone().multiplyScalar(70).add(new THREE.Vector3((random() - 0.5) * 50, 14 + random() * 10, (random() - 0.5) * 20));
-      current = { origin, velocity: new THREE.Vector3(-(0.6 + random()), -0.45, (random() - 0.5) * 0.3).normalize(), t: 0 };
+      const origin = viewDirection
+        .clone()
+        .multiplyScalar(70)
+        .add(new THREE.Vector3((random() - 0.5) * 50, 14 + random() * 10, (random() - 0.5) * 20));
+      current = {
+        origin,
+        velocity: new THREE.Vector3(-(0.6 + random()), -0.45, (random() - 0.5) * 0.3).normalize(),
+        t: 0
+      };
     }
     if (!current) return;
     current.t += dt / DURATION;

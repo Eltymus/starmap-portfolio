@@ -1,5 +1,6 @@
 const pairOddVertices = (figure, links, degree) => {
-  const distance = (a, b) => Math.hypot(figure.points[a][0] - figure.points[b][0], figure.points[a][1] - figure.points[b][1]);
+  const distance = (a, b) =>
+    Math.hypot(figure.points[a][0] - figure.points[b][0], figure.points[a][1] - figure.points[b][1]);
   let odd = [...Array(figure.points.length).keys()].filter((v) => degree[v] % 2);
   while (odd.length > 2) {
     let bestI = 1;

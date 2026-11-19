@@ -1,15 +1,102 @@
-.btn-row{display:flex;flex-wrap:wrap;gap:10px}
-.btn{align-self:flex-start;min-height:48px;padding:13px 24px;border:1px solid var(--gold);background:linear-gradient(100deg,#F3D99B,#C9973E);color:var(--navy);font:600 12px var(--font-caps);letter-spacing:.2em;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;transition:transform .25s,box-shadow .25s}
-.btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgb(var(--gold-rgb) / .25)}
-.btn.btn-ghost{background:transparent;color:var(--gold)}
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 
-.text-button{background:none;border:0;padding:10px 0;min-height:44px;font:italic 500 18px var(--font-classic);color:var(--gold);cursor:pointer;align-self:flex-start}
+.btn {
+  align-self: flex-start;
+  min-height: 48px;
+  padding: 13px 24px;
+  border: 1px solid var(--gold);
+  background: linear-gradient(100deg, #f3d99b, #c9973e);
+  color: var(--navy);
+  font: 600 12px var(--font-caps);
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s;
+}
 
-.open-chart{align-self:flex-start;display:inline-flex;align-items:center;gap:12px;min-height:44px;padding:6px 0;border:0;background:none;color:var(--gold);font:italic 500 19px var(--font-classic);cursor:pointer}
-.open-chart-line{display:block;width:26px;height:1px;background:linear-gradient(90deg,transparent,var(--gold));transition:width .5s var(--ease-out)}
-.open-chart-star{font-style:normal;font-size:12px;display:inline-block;transition:transform .6s}
-.open-chart:hover .open-chart-line,.open-chart:focus-visible .open-chart-line{width:52px}
-.open-chart:hover .open-chart-star,.open-chart:focus-visible .open-chart-star{transform:rotate(180deg)}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgb(var(--gold-rgb) / 25%);
+}
 
-.close-button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:rgb(var(--navy-rgb) / .6);color:var(--gold);font-size:15px;cursor:pointer;transition:border-color .3s,transform .4s}
-.close-button:hover{border-color:var(--gold);transform:rotate(90deg)}
+.btn.btn-ghost {
+  background: transparent;
+  color: var(--gold);
+}
+
+.text-button {
+  background: none;
+  border: 0;
+  padding: 10px 0;
+  min-height: 44px;
+  font: italic 500 18px var(--font-classic);
+  color: var(--gold);
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.open-chart {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 6px 0;
+  border: 0;
+  background: none;
+  color: var(--gold);
+  font: italic 500 19px var(--font-classic);
+  cursor: pointer;
+}
+
+.open-chart-line {
+  display: block;
+  width: 26px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold));
+  transition: width 0.5s var(--ease-out);
+}
+
+.open-chart-star {
+  font-style: normal;
+  font-size: 12px;
+  display: inline-block;
+  transition: transform 0.6s;
+}
+
+.open-chart:hover .open-chart-line,
+.open-chart:focus-visible .open-chart-line {
+  width: 52px;
+}
+
+.open-chart:hover .open-chart-star,
+.open-chart:focus-visible .open-chart-star {
+  transform: rotate(180deg);
+}
+
+.close-button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgb(var(--navy-rgb) / 60%);
+  color: var(--gold);
+  font-size: 15px;
+  cursor: pointer;
+  transition:
+    border-color 0.3s,
+    transform 0.4s;
+}
+
+.close-button:hover {
+  border-color: var(--gold);
+  transform: rotate(90deg);
+}

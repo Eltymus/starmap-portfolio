@@ -1,7 +1,17 @@
 import { CHAPTERS } from '../../data/chapters.js';
 import { assetUrl } from '../../lib/assets.js';
 import { COLORS, fontCaps, fontMono } from '../../lib/theme.js';
-import { ART_CENTER as CENTER, UNIT as U, X, Y, goldStroke, sparkle, circle, dotted, scatterSparkles } from './canvas.js';
+import {
+  ART_CENTER as CENTER,
+  UNIT as U,
+  X,
+  Y,
+  goldStroke,
+  sparkle,
+  circle,
+  dotted,
+  scatterSparkles
+} from './canvas.js';
 
 const IMAGE_FILES = {
   mole: 'img/mole.png',
@@ -48,16 +58,19 @@ export const drawRingFrame = (ctx, radius, center = [0, 0]) => {
   circle(ctx, CENTER, CENTER, (radius + 0.22) * U);
   ctx.globalAlpha = 0.75;
   for (let k = 0; k < 24; k++) {
-    const a = k / 24 * Math.PI * 2;
+    const a = (k / 24) * Math.PI * 2;
     const length = k % 6 ? 0.1 : 0.22;
     ctx.beginPath();
     ctx.moveTo(CENTER + Math.cos(a) * (radius + 0.22) * U, CENTER + Math.sin(a) * (radius + 0.22) * U);
-    ctx.lineTo(CENTER + Math.cos(a) * (radius + 0.22 + length) * U, CENTER + Math.sin(a) * (radius + 0.22 + length) * U);
+    ctx.lineTo(
+      CENTER + Math.cos(a) * (radius + 0.22 + length) * U,
+      CENTER + Math.sin(a) * (radius + 0.22 + length) * U
+    );
     ctx.stroke();
   }
   ctx.globalAlpha = 0.8;
   [0, 1, 2, 3].forEach((k) => {
-    const a = k * Math.PI / 2;
+    const a = (k * Math.PI) / 2;
     sparkle(ctx, CENTER + Math.cos(a) * (radius + 0.6) * U, CENTER + Math.sin(a) * (radius + 0.6) * U, 9);
   });
   ctx.restore();
@@ -67,7 +80,7 @@ const drawCompassRose = (ctx) => {
   ctx.save();
   ctx.lineWidth = 0.8;
   for (let k = 0; k < 32; k++) {
-    const a = k / 32 * Math.PI * 2;
+    const a = (k / 32) * Math.PI * 2;
     ctx.globalAlpha = k % 4 ? 0.22 : 0.45;
     ctx.beginPath();
     ctx.moveTo(CENTER + Math.cos(a) * 1.3 * U, CENTER + Math.sin(a) * 1.3 * U);
@@ -80,7 +93,7 @@ const drawCompassRose = (ctx) => {
   ctx.save();
   for (let k = 0; k < 8; k++) {
     const tip = points[1 + k];
-    const valley = points[9 + (k + 7) % 8];
+    const valley = points[9 + ((k + 7) % 8)];
     ctx.globalAlpha = k % 2 ? 0.16 : 0.26;
     ctx.beginPath();
     ctx.moveTo(CENTER, CENTER);
@@ -101,7 +114,12 @@ const drawCompassRose = (ctx) => {
   ctx.font = fontCaps(26);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  [['N', 0, 5.62], ['E', 5.62, 0], ['S', 0, -5.62], ['W', -5.62, 0]].forEach(([letter, u, v]) => {
+  [
+    ['N', 0, 5.62],
+    ['E', 5.62, 0],
+    ['S', 0, -5.62],
+    ['W', -5.62, 0]
+  ].forEach(([letter, u, v]) => {
     ctx.fillStyle = COLORS.navy;
     ctx.beginPath();
     ctx.arc(X(u), Y(v), 16, 0, 7);
@@ -144,7 +162,7 @@ const drawLaurelBranch = (ctx, side) => {
   ctx.lineWidth = 1.6;
   ctx.beginPath();
   for (let k = 0; k <= 40; k++) {
-    const a = start + (end - start) * k / 40;
+    const a = start + ((end - start) * k) / 40;
     if (k) ctx.lineTo(CENTER + Math.cos(a) * rx, cy + Math.sin(a) * ry);
     else ctx.moveTo(CENTER + Math.cos(a) * rx, cy + Math.sin(a) * ry);
   }
@@ -155,7 +173,7 @@ const drawLaurelBranch = (ctx, side) => {
     const a = start + (end - start) * t;
     const px = CENTER + Math.cos(a) * rx;
     const py = cy + Math.sin(a) * ry;
-    const tangent = a + side * Math.PI / 2;
+    const tangent = a + (side * Math.PI) / 2;
     const size = 1 - t * 0.55;
     drawLaurelLeaf(ctx, px, py, 30 * size, 9 * size, tangent + Math.PI + side * 0.55);
     drawLaurelLeaf(ctx, px, py, 26 * size, 8 * size, tangent + Math.PI - side * 0.75);
@@ -165,7 +183,14 @@ const drawLaurelBranch = (ctx, side) => {
       ctx.fill();
     }
   }
-  drawLaurelLeaf(ctx, CENTER + Math.cos(end) * rx, cy + Math.sin(end) * ry, 22, 7, end + side * Math.PI / 2 + Math.PI);
+  drawLaurelLeaf(
+    ctx,
+    CENTER + Math.cos(end) * rx,
+    cy + Math.sin(end) * ry,
+    22,
+    7,
+    end + (side * Math.PI) / 2 + Math.PI
+  );
 };
 
 const drawRibbonBow = (ctx) => {
@@ -193,7 +218,7 @@ const laurentius = (ctx) => {
   ctx.lineWidth = 1;
   circle(ctx, CENTER, CENTER, 5.55 * U);
   for (let i = 0; i < 64; i++) {
-    const a = i / 64 * Math.PI * 2;
+    const a = (i / 64) * Math.PI * 2;
     if (i % 8 === 0) sparkle(ctx, CENTER + Math.cos(a) * 5.73 * U, CENTER + Math.sin(a) * 5.73 * U, 9);
   }
   drawCompassRose(ctx);
@@ -204,7 +229,14 @@ const laurentius = (ctx) => {
 
 const turin = (ctx) => {
   const k = (9.6 / 1085) * U;
-  drawImageWhenLoaded(ctx, images.mole, CENTER + (60 - 248) * k, CENTER - (5.0 + 17 * 9.6 / 1085) * U, 380 * k, 1110 * k);
+  drawImageWhenLoaded(
+    ctx,
+    images.mole,
+    CENTER + (60 - 248) * k,
+    CENTER - (5.0 + (17 * 9.6) / 1085) * U,
+    380 * k,
+    1110 * k
+  );
   goldStroke(ctx, 1.4);
   scatterSparkles(ctx, 10, 7);
 };
@@ -218,7 +250,9 @@ const stack = (ctx) => {
   ctx.font = fontMono(25);
   ctx.textAlign = 'left';
   ctx.textBaseline = 'middle';
-  ['C:\\LORENZO> dir /stack', ' VUE  NUXT  REACT  NODE', ' SQL  DOCKER  N8N  AI', 'C:\\LORENZO> _'].forEach((line, n) => ctx.fillText(line, X(-3.75), Y(3.2 - n * 0.62)));
+  ['C:\\LORENZO> dir /stack', ' VUE  NUXT  REACT  NODE', ' SQL  DOCKER  N8N  AI', 'C:\\LORENZO> _'].forEach((line, n) =>
+    ctx.fillText(line, X(-3.75), Y(3.2 - n * 0.62))
+  );
   ctx.restore();
   scatterSparkles(ctx, 12, 11);
 };
@@ -240,7 +274,11 @@ const bookRelay = (ctx) => {
     ctx.bezierCurveTo(X(-1.4), Y(3.0), X(0.7), Y(4.2), X(1.89), Y(4.84));
     ctx.stroke();
   });
-  [[-1.05, 2.6, 12], [-0.25, 3.9, 16], [1.89, 4.84, 22]].forEach(([a, b, size]) => sparkle(ctx, X(a), Y(b), size));
+  [
+    [-1.05, 2.6, 12],
+    [-0.25, 3.9, 16],
+    [1.89, 4.84, 22]
+  ].forEach(([a, b, size]) => sparkle(ctx, X(a), Y(b), size));
   scatterSparkles(ctx, 10, 17);
 };
 

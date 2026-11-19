@@ -1,10 +1,13 @@
 ---
 import CloseButton from './CloseButton.astro';
 ---
+
 <div id="full-map" class="overlay" aria-hidden="true">
   <CloseButton class="full-map-close" label="Close the full map" />
   <div class="full-map-dialog" role="dialog" aria-label="The complete chart">
-    <div class="full-map-chart"><svg id="full-map-svg" viewBox="-112 -112 224 224"></svg></div>
+    <div class="full-map-chart">
+      <svg id="full-map-svg" viewBox="-112 -112 224 224"></svg>
+    </div>
     <p class="full-map-hint">Choose a constellation to travel there</p>
   </div>
 </div>

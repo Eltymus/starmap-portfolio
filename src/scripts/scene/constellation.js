@@ -19,7 +19,8 @@ const ribbonGeometry = new THREE.PlaneGeometry(1, 1);
 
 const fadeTo = (current, target, rate) => current + (target - current) * rate;
 
-const additiveMaterial = (options) => new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, ...options });
+const additiveMaterial = (options) =>
+  new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, ...options });
 
 export class Constellation {
   constructor(chapter, direction, scene) {
@@ -60,7 +61,12 @@ export class Constellation {
       this.baseSizes.push(6 + ((k * 37) % 4));
       this.sizes[k] = this.baseSizes[k] * 0.35;
     });
-    this.starGeometry = createStarGeometry(positions, colors, this.sizes, new Float32Array(count).fill(STAR_TYPE.cross));
+    this.starGeometry = createStarGeometry(
+      positions,
+      colors,
+      this.sizes,
+      new Float32Array(count).fill(STAR_TYPE.cross)
+    );
     this.starMaterial = createStarMaterial({ twinkle: 0.25, maxSize: 44, flare: 0.7, alpha: 0.6 });
     this.group.add(new THREE.Points(this.starGeometry, this.starMaterial));
     this.ignition = new Float32Array(count);
@@ -96,7 +102,13 @@ export class Constellation {
     this.linePositions = new Float32Array(this.segments.length * 6);
     this.lineGeometry = new THREE.BufferGeometry();
     this.lineGeometry.setAttribute('position', new THREE.BufferAttribute(this.linePositions, 3));
-    this.lineMaterial = new THREE.LineBasicMaterial({ color: HEX.strokeWhite, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+    this.lineMaterial = new THREE.LineBasicMaterial({
+      color: HEX.strokeWhite,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
     this.group.add(new THREE.LineSegments(this.lineGeometry, this.lineMaterial));
 
     this.glowMaterial = additiveMaterial({ map: stripeTexture, color: HEX.gold, opacity: 0 });
@@ -144,7 +156,12 @@ export class Constellation {
     this.dustPositions = new Float32Array(DUST_COUNT * 3).fill(OFFSCREEN);
     this.dustSizes = new Float32Array(DUST_COUNT);
     this.dust = new THREE.Points(
-      createStarGeometry(this.dustPositions, new Float32Array(DUST_COUNT * 3).map((_, k) => (k % 3 === 2 ? 0.6 : 1)), this.dustSizes, new Float32Array(DUST_COUNT).fill(STAR_TYPE.glint)),
+      createStarGeometry(
+        this.dustPositions,
+        new Float32Array(DUST_COUNT * 3).map((_, k) => (k % 3 === 2 ? 0.6 : 1)),
+        this.dustSizes,
+        new Float32Array(DUST_COUNT).fill(STAR_TYPE.glint)
+      ),
       createStarMaterial({ twinkle: 0.5, maxSize: 14, flare: 0.8 })
     );
     this.group.add(this.dust);
@@ -217,7 +234,7 @@ export class Constellation {
         const length = s.length * t;
         s.ribbon.visible = true;
         s.ribbon.scale.set(length, 0.42, 1);
-        s.ribbon.position.set(s.a.x + (s.b.x - s.a.x) * t / 2, s.a.y + (s.b.y - s.a.y) * t / 2, 0.01);
+        s.ribbon.position.set(s.a.x + ((s.b.x - s.a.x) * t) / 2, s.a.y + ((s.b.y - s.a.y) * t) / 2, 0.01);
       } else s.ribbon.visible = false;
       if (t > 0 && t < 1) penPositions[s.trail] = [ex, ey];
       if (drawn > s.start && !this.lit[s.ia]) this.ignite(s.ia, s.a.x, s.a.y, isActive, 8);
@@ -229,19 +246,45 @@ export class Constellation {
   updateOpacities(isActive, index, time) {
     const done = this.done;
     this.lineMaterial.opacity = fadeTo(this.lineMaterial.opacity, isActive ? 0.95 : this.visited ? 0.32 : 0, 0.06);
-    this.glowMaterial.opacity = fadeTo(this.glowMaterial.opacity, isActive ? 0.55 + 0.12 * Math.sin(time * 0.002 + index) : this.visited ? 0.14 : 0, 0.06);
-    this.guide.material.opacity = fadeTo(this.guide.material.opacity, isActive && !done ? 0.28 : !this.visited ? 0.06 : 0, 0.05);
-    this.art.material.opacity = fadeTo(this.art.material.opacity, isActive && this.drawn > this.totalLength * 0.55 ? 0.75 : 0, isActive ? 0.03 : 0.08);
-    this.label.material.opacity = fadeTo(this.label.material.opacity, isActive && done ? 1 : this.visited ? 0.25 : 0, 0.05);
-    this.starMaterial.uniforms.uAlpha.value = fadeTo(this.starMaterial.uniforms.uAlpha.value, isActive ? 1 : this.visited ? 0.55 : 0.35, 0.06);
+    this.glowMaterial.opacity = fadeTo(
+      this.glowMaterial.opacity,
+      isActive ? 0.55 + 0.12 * Math.sin(time * 0.002 + index) : this.visited ? 0.14 : 0,
+      0.06
+    );
+    this.guide.material.opacity = fadeTo(
+      this.guide.material.opacity,
+      isActive && !done ? 0.28 : !this.visited ? 0.06 : 0,
+      0.05
+    );
+    this.art.material.opacity = fadeTo(
+      this.art.material.opacity,
+      isActive && this.drawn > this.totalLength * 0.55 ? 0.75 : 0,
+      isActive ? 0.03 : 0.08
+    );
+    this.label.material.opacity = fadeTo(
+      this.label.material.opacity,
+      isActive && done ? 1 : this.visited ? 0.25 : 0,
+      0.05
+    );
+    this.starMaterial.uniforms.uAlpha.value = fadeTo(
+      this.starMaterial.uniforms.uAlpha.value,
+      isActive ? 1 : this.visited ? 0.55 : 0.35,
+      0.06
+    );
   }
 
   updateStarSizes(isActive, time) {
     for (let v = 0; v < this.baseSizes.length; v++) {
       this.ignition[v] += ((this.lit[v] ? 1 : 0) - this.ignition[v]) * 0.12;
       this.flash[v] *= 0.94;
-      const pulse = isActive && this.done && this.notes[v] ? 1 + 0.16 * (0.5 + 0.5 * Math.sin(time * 0.004 + v * 1.7)) : 1;
-      this.sizes[v] = this.baseSizes[v] * (0.35 + 0.65 * this.ignition[v]) * (1 + this.flash[v] * 1.1) * pulse * (this.hovered === v ? 1.5 : 1);
+      const pulse =
+        isActive && this.done && this.notes[v] ? 1 + 0.16 * (0.5 + 0.5 * Math.sin(time * 0.004 + v * 1.7)) : 1;
+      this.sizes[v] =
+        this.baseSizes[v] *
+        (0.35 + 0.65 * this.ignition[v]) *
+        (1 + this.flash[v] * 1.1) *
+        pulse *
+        (this.hovered === v ? 1.5 : 1);
     }
     let moving = isActive;
     if (!moving) {
@@ -315,7 +358,9 @@ export class Constellation {
   findHoveredNote(camera, rect, pointer, index) {
     for (const key in this.notes) {
       const v = +key;
-      const projected = new THREE.Vector3(this.figure.points[v][0], this.figure.points[v][1], 0.05).applyMatrix4(this.group.matrixWorld).project(camera);
+      const projected = new THREE.Vector3(this.figure.points[v][0], this.figure.points[v][1], 0.05)
+        .applyMatrix4(this.group.matrixWorld)
+        .project(camera);
       const sx = (projected.x * 0.5 + 0.5) * rect.width + rect.left;
       const sy = (-projected.y * 0.5 + 0.5) * rect.height + rect.top;
       if (Math.hypot(sx - pointer.x, sy - pointer.y) < HOVER_RADIUS) {

@@ -7,4 +7,7 @@ interface Props {
 const { href, class: className } = Astro.props;
 const external = href.startsWith('http');
 ---
-<a class={className} href={href} target={external ? '_blank' : undefined} rel={external ? 'noopener' : undefined}><slot /></a>
+
+<a class={className} href={href} target={external ? '_blank' : undefined} rel={external ? 'noopener' : undefined}>
+  <slot />
+</a>

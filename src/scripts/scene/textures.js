@@ -115,7 +115,7 @@ const ORNAMENT_DRAWINGS = {
   sun: (ctx) => {
     circle(ctx, 256, 256, 70);
     for (let i = 0; i < 16; i++) {
-      const a = i / 16 * Math.PI * 2;
+      const a = (i / 16) * Math.PI * 2;
       const length = i % 2 ? 130 : 170;
       ctx.beginPath();
       ctx.moveTo(256 + Math.cos(a - 0.08) * 90, 256 + Math.sin(a - 0.08) * 90);

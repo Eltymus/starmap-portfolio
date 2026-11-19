@@ -9,7 +9,10 @@ const DRAW_DELAY = 0.9;
 const PADDING = 1.2;
 
 const { points, edges } = CHAPTERS[Astro.props.index].figure;
-let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+let x0 = 1e9,
+  x1 = -1e9,
+  y0 = 1e9,
+  y1 = -1e9;
 points.forEach(([x, y]) => {
   x0 = Math.min(x0, x);
   x1 = Math.max(x1, x);
@@ -19,10 +22,25 @@ points.forEach(([x, y]) => {
 const size = Math.max(x1 - x0, y1 - y0) + PADDING * 2;
 const cx = (x0 + x1) / 2;
 const cy = (y0 + y1) / 2;
-const viewBox = (cx - size / 2) + ' ' + (cy - size / 2) + ' ' + size + ' ' + size;
+const viewBox = cx - size / 2 + ' ' + (cy - size / 2) + ' ' + size + ' ' + size;
 const delay = (seconds) => 'transition-delay:' + seconds.toFixed(2) + 's';
 ---
+
 <svg class="mini-constellation" viewBox={viewBox} aria-hidden="true">
-  {edges.map(([a, b], k) => <line pathLength="1" style={delay(DRAW_DELAY + k * 0.09)} x1={points[a][0]} y1={-points[a][1]} x2={points[b][0]} y2={-points[b][1]} />)}
-  {points.map(([x, y], k) => <><circle class="halo" style={delay(DRAW_DELAY + k * 0.06)} cx={x} cy={-y} r=".55" /><circle style={delay(DRAW_DELAY + k * 0.06)} cx={x} cy={-y} r=".24" /></>)}
+  {edges.map(([a, b], k) => (
+    <line
+      pathLength="1"
+      style={delay(DRAW_DELAY + k * 0.09)}
+      x1={points[a][0]}
+      y1={-points[a][1]}
+      x2={points[b][0]}
+      y2={-points[b][1]}
+    />
+  ))}
+  {points.map(([x, y], k) => (
+    <>
+      <circle class="halo" style={delay(DRAW_DELAY + k * 0.06)} cx={x} cy={-y} r=".55" />
+      <circle style={delay(DRAW_DELAY + k * 0.06)} cx={x} cy={-y} r=".24" />
+    </>
+  ))}
 </svg>

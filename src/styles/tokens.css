@@ -1,23 +1,20 @@
-:root{
-  --navy:#0A1233;
-  --navy-rgb:10 18 51;
-  --abyss-rgb:4 8 24;
-  --ink:#F3EBD8;
-  --ink-rgb:243 235 216;
-  --muted:#C3C6DA;
-  --gold:#E2BE74;
-  --gold-rgb:226 190 116;
-  --gold-light:#F6DFA6;
-  --line:rgb(var(--gold-rgb) / .42);
-  --line-faint:rgb(var(--gold-rgb) / .18);
-  --card:rgba(11,19,52,.9);
-
-  --font-caps:Cinzel,serif;
-  --font-classic:'Cormorant Garamond',serif;
-  --font-body:Inter,sans-serif;
-
-  --ease-out:cubic-bezier(.2,.8,.2,1);
-  --ease-soft:cubic-bezier(.2,.7,.2,1);
-
-  --gutter:max(0px,calc((100vw - 1280px) / 2));
+:root {
+  --navy: #0a1233;
+  --navy-rgb: 10 18 51;
+  --abyss-rgb: 4 8 24;
+  --ink: #f3ebd8;
+  --ink-rgb: 243 235 216;
+  --muted: #c3c6da;
+  --gold: #e2be74;
+  --gold-rgb: 226 190 116;
+  --gold-light: #f6dfa6;
+  --line: rgb(var(--gold-rgb) / 42%);
+  --line-faint: rgb(var(--gold-rgb) / 18%);
+  --card: rgb(11 19 52 / 90%);
+  --font-caps: Cinzel, serif;
+  --font-classic: 'Cormorant Garamond', serif;
+  --font-body: Inter, sans-serif;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-soft: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --gutter: max(0px, calc((100vw - 1280px) / 2));
 }

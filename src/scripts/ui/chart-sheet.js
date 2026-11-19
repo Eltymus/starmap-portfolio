@@ -40,7 +40,7 @@ export const createChartSheet = ({ goTo }) => {
     next.disabled = index === CHAPTER_COUNT - 1;
     prev.textContent = index > 0 ? '‹ ' + CHAPTERS[index - 1].name : '';
     next.textContent = index < CHAPTER_COUNT - 1 ? CHAPTERS[index + 1].name + ' ›' : '';
-    counter.textContent = (index + 1) + ' / ' + CHAPTER_COUNT;
+    counter.textContent = index + 1 + ' / ' + CHAPTER_COUNT;
   };
 
   const open = (index) => {
@@ -54,13 +54,15 @@ export const createChartSheet = ({ goTo }) => {
     if (target === current) return;
     current = target;
     sheet.classList.add('is-turning');
-    const focusOnFooter = document.activeElement && document.activeElement.closest && document.activeElement.closest('.sheet-footer');
+    const focusOnFooter =
+      document.activeElement && document.activeElement.closest && document.activeElement.closest('.sheet-footer');
     setTimeout(() => {
       fill(target);
       sheet.classList.remove('is-turning');
       const lostFocus = focusOnFooter && !root.contains(document.activeElement);
       const focusDisabled = document.activeElement && document.activeElement.disabled;
-      if (lostFocus || focusDisabled) (root.querySelector('.sheet-footer button:not([disabled])') || closeButton).focus({ preventScroll: true });
+      if (lostFocus || focusDisabled)
+        (root.querySelector('.sheet-footer button:not([disabled])') || closeButton).focus({ preventScroll: true });
     }, PAGE_TURN);
   };
 

@@ -13,21 +13,35 @@ npm run build      # static site in dist/
 npm run preview
 ```
 
+## Quality checks
+
+| Command                  | What it does                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `npm run lint`           | ESLint (JS/TS/Astro), Stylelint (CSS) and a Prettier format check                                |
+| `npm run format`         | Rewrites every file in the house style (Prettier)                                                |
+| `npm run check`          | Type-checks the whole project with `astro check`                                                 |
+| `npm test`               | Unit tests (Vitest) for the pure logic: pen trails, maths, sky coordinates, chapter data         |
+| `npm run test:e2e`       | End-to-end tests (Playwright) against the built site: navigation, dialogs, keyboard, screenshots |
+| `npm run test:e2e:linux` | The same suite inside the Linux container used by CI (needs Docker)                              |
+| `npm run verify`         | Everything above, in the order CI runs it                                                        |
+
+Screenshot baselines live in `tests/e2e/__screenshots__/`, one set per platform. CI compares against the Linux set; after an intentional visual change, refresh it with `npm run build && npm run test:e2e:linux -- --update-snapshots` (and `npm run test:e2e:update` for the local set).
+
 ## Where things live
 
-| Path | What |
-| --- | --- |
-| `src/data/chapters.js` | All content, one object per chapter: name, subtitle, star notes, chart-sheet page, constellation geometry and layout tweaks |
-| `src/pages/index.astro` | The page: the text of every section, composed from components |
-| `src/components/` | Reusable Astro pieces: `Chapter` (section + card), `Button`, `Link`, `Chips`, `StackList`, `Timeline`, dialogs, moon nav, header… |
-| `src/layouts/Base.astro` | `<head>`, fonts (self-hosted via Fontsource) |
-| `src/lib/` | Shared helpers: asset URLs, math, colour palette and canvas fonts |
-| `src/scripts/starmap.js` | Entry point that wires the UI and the 3D scene together |
-| `src/scripts/ui/` | Navigation, chart sheet, full map, star tooltip, keyboard, shared dialog behaviour |
-| `src/scripts/scene/` | Three.js: renderer loop, sky, star shader, constellations, shooting star, textures |
-| `src/scripts/art/` | Canvas engravings: drawing primitives, the engraving and decorations of each chapter |
-| `src/styles/` | One CSS file per component, imported in order by `global.css`; colours, fonts and easings live in `tokens.css` |
-| `public/img/` | Gold engravings behind the constellations and the portrait |
+| Path                     | What                                                                                                                              |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| `src/data/chapters.js`   | All content, one object per chapter: name, subtitle, star notes, chart-sheet page, constellation geometry and layout tweaks       |
+| `src/pages/index.astro`  | The page: the text of every section, composed from components                                                                     |
+| `src/components/`        | Reusable Astro pieces: `Chapter` (section + card), `Button`, `Link`, `Chips`, `StackList`, `Timeline`, dialogs, moon nav, header… |
+| `src/layouts/Base.astro` | `<head>`, fonts (self-hosted via Fontsource)                                                                                      |
+| `src/lib/`               | Shared helpers: asset URLs, math, colour palette and canvas fonts                                                                 |
+| `src/scripts/starmap.js` | Entry point that wires the UI and the 3D scene together                                                                           |
+| `src/scripts/ui/`        | Navigation, chart sheet, full map, star tooltip, keyboard, shared dialog behaviour                                                |
+| `src/scripts/scene/`     | Three.js: renderer loop, sky, star shader, constellations, shooting star, textures                                                |
+| `src/scripts/art/`       | Canvas engravings: drawing primitives, the engraving and decorations of each chapter                                              |
+| `src/styles/`            | One CSS file per component, imported in order by `global.css`; colours, fonts and easings live in `tokens.css`                    |
+| `public/img/`            | Gold engravings behind the constellations and the portrait                                                                        |
 
 ### Common edits
 
@@ -40,10 +54,10 @@ npm run preview
 
 1. Push to the `main` branch of `github.com/<user>/starmap-portfolio`.
 2. On GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-3. The workflow in `.github/workflows/deploy.yml` builds and publishes to `https://<user>.github.io/starmap-portfolio/`.
+3. The workflow in `.github/workflows/ci.yml` runs lint, type check, unit and end-to-end tests on every push and pull request; on `main`, only when they all pass, it builds and publishes to `https://<user>.github.io/starmap-portfolio/`.
 
 If the GitHub username or repo name changes, update `site` and `base` in `astro.config.mjs`.
 
 ## Image credits
 
-Engravings are public domain, traced in gold: Mole Antonelliana (image provided by the author), Leonardo da Vinci's icosahedron (Pacioli, *De divina proportione*, 1509), grapes (*The Cultivation of the Native Grape*, 1868), stair (*Stair-Building*), open book (Nodier, *The Bibliomaniac*, 1894), bird with letter (chapbook *History of Birds*, c. 1830); the 90s computer is an Openclipart drawing (public domain).
+Engravings are public domain, traced in gold: Mole Antonelliana (image provided by the author), Leonardo da Vinci's icosahedron (Pacioli, _De divina proportione_, 1509), grapes (_The Cultivation of the Native Grape_, 1868), stair (_Stair-Building_), open book (Nodier, _The Bibliomaniac_, 1894), bird with letter (chapbook _History of Birds_, c. 1830); the 90s computer is an Openclipart drawing (public domain).

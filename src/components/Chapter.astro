@@ -15,14 +15,21 @@ const { index, title, note, variant = 'card' } = Astro.props;
 const chapter = CHAPTERS[index];
 const isCard = variant === 'card';
 ---
+
 <section class:list={['chapter', { 'align-right': chapter.side < 0, 'is-active': index === 0 }]}>
   <div class:list={['panel', isCard ? 'card' : 'panel-free']}>
-    {isCard && <span class="medallion" aria-hidden="true">{chapter.numeral}</span>}
+    {isCard && (
+      <span class="medallion" aria-hidden="true">
+        {chapter.numeral}
+      </span>
+    )}
     {isCard && <MiniConstellation index={index} />}
     {isCard && <Kicker index={index} note={note} />}
     {isCard && <Ornament />}
     {isCard && <h2>{title}</h2>}
     <slot />
-    <button class="open-chart" type="button"><span class="open-chart-line"></span>Open the chart<span class="open-chart-star">✦</span></button>
+    <button class="open-chart" type="button">
+      <span class="open-chart-line"></span>Open the chart<span class="open-chart-star">✦</span>
+    </button>
   </div>
 </section>

@@ -4,8 +4,13 @@ import IntroSplash from './IntroSplash.astro';
 import MoonNav from './MoonNav.astro';
 import SiteHeader from './SiteHeader.astro';
 ---
+
 <div id="stage">
-  <canvas id="sky-canvas" role="img" aria-label="A gold-on-navy star map; each section draws its own constellation"></canvas>
+  <canvas
+    id="sky-canvas"
+    role="img"
+    aria-label="A gold-on-navy star map; each section draws its own constellation"
+  ></canvas>
   <Frame />
   <SiteHeader />
   <div id="coords">RA 00h 00m · DEC +00°</div>

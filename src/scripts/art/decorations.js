@@ -20,14 +20,17 @@ const drawFineQuill = (ctx, cx, cy, s, rotation) => {
   const vane = (side, maxWidth) => {
     const points = [];
     for (let k = 0; k <= 30; k++) {
-      const t = 0.22 + 0.78 * k / 30;
+      const t = 0.22 + (0.78 * k) / 30;
       const [a, b] = shaft(t);
       const w = Math.sin(Math.min(1, (t - 0.22) / 0.7) * Math.PI * 0.92) * maxWidth * (1 - Math.max(0, t - 0.85) * 3);
       points.push([a + side * w, b - w * 0.35]);
     }
     return points;
   };
-  [[-1, 0.5 * s * U], [1, 0.32 * s * U]].forEach(([side, maxWidth]) => {
+  [
+    [-1, 0.5 * s * U],
+    [1, 0.32 * s * U]
+  ].forEach(([side, maxWidth]) => {
     const edge = vane(side, maxWidth);
     ctx.lineWidth = 1.1;
     ctx.beginPath();
@@ -41,7 +44,7 @@ const drawFineQuill = (ctx, cx, cy, s, rotation) => {
     ctx.lineWidth = 0.55;
     for (let k = 2; k < 30; k += 1) {
       if (side < 0 && (k === 11 || k === 12 || k === 19)) continue;
-      const t = 0.22 + 0.78 * k / 30;
+      const t = 0.22 + (0.78 * k) / 30;
       const [a, b] = shaft(t);
       const p = edge[k];
       ctx.beginPath();
@@ -97,9 +100,9 @@ const drawQuill = (ctx, cx, cy, s, rotation) => {
     const yy = -k * 0.26 * s * U;
     ctx.beginPath();
     ctx.moveTo(0, yy);
-    ctx.lineTo(-0.22 * s * U * Math.sin(k / 9 * Math.PI), yy - 0.12 * s * U);
+    ctx.lineTo(-0.22 * s * U * Math.sin((k / 9) * Math.PI), yy - 0.12 * s * U);
     ctx.moveTo(0, yy);
-    ctx.lineTo(0.22 * s * U * Math.sin(k / 9 * Math.PI), yy - 0.12 * s * U);
+    ctx.lineTo(0.22 * s * U * Math.sin((k / 9) * Math.PI), yy - 0.12 * s * U);
     ctx.stroke();
   }
   ctx.restore();
@@ -122,10 +125,10 @@ const drawBook = (ctx, cx, cy, w, h, rotation) => {
   ctx.save();
   ctx.translate(X(cx), Y(cy));
   ctx.rotate(rotation || 0);
-  ctx.strokeRect(-w * U / 2, -h * U / 2, w * U, h * U);
+  ctx.strokeRect((-w * U) / 2, (-h * U) / 2, w * U, h * U);
   ctx.beginPath();
-  ctx.moveTo(-w * U / 2 + 6, -h * U / 2);
-  ctx.lineTo(-w * U / 2 + 6, h * U / 2);
+  ctx.moveTo((-w * U) / 2 + 6, (-h * U) / 2);
+  ctx.lineTo((-w * U) / 2 + 6, (h * U) / 2);
   ctx.stroke();
   ctx.restore();
 };
@@ -134,11 +137,11 @@ const drawEnvelope = (ctx, cx, cy, w, h, rotation) => {
   ctx.save();
   ctx.translate(X(cx), Y(cy));
   ctx.rotate(rotation || 0);
-  ctx.strokeRect(-w * U / 2, -h * U / 2, w * U, h * U);
+  ctx.strokeRect((-w * U) / 2, (-h * U) / 2, w * U, h * U);
   ctx.beginPath();
-  ctx.moveTo(-w * U / 2, -h * U / 2);
+  ctx.moveTo((-w * U) / 2, (-h * U) / 2);
   ctx.lineTo(0, h * U * 0.1);
-  ctx.lineTo(w * U / 2, -h * U / 2);
+  ctx.lineTo((w * U) / 2, (-h * U) / 2);
   ctx.stroke();
   ctx.restore();
 };
@@ -147,7 +150,14 @@ const drawWorkflow = (ctx, points, links) => {
   links.forEach(([a, b]) => {
     ctx.beginPath();
     ctx.moveTo(X(points[a][0]), Y(points[a][1]));
-    ctx.bezierCurveTo(X((points[a][0] + points[b][0]) / 2), Y(points[a][1]), X((points[a][0] + points[b][0]) / 2), Y(points[b][1]), X(points[b][0]), Y(points[b][1]));
+    ctx.bezierCurveTo(
+      X((points[a][0] + points[b][0]) / 2),
+      Y(points[a][1]),
+      X((points[a][0] + points[b][0]) / 2),
+      Y(points[b][1]),
+      X(points[b][0]),
+      Y(points[b][1])
+    );
     ctx.stroke();
   });
   points.forEach((p) => {
@@ -156,8 +166,24 @@ const drawWorkflow = (ctx, points, links) => {
 };
 
 const ALPINE_RANGES = [
-  [[-7.6, 3.5], [-6.3, 5.0], [-5.5, 4.2], [-4.2, 5.5], [-3.0, 4.3], [-2.2, 4.7], [-1.3, 3.6]],
-  [[1.3, 3.6], [2.4, 4.6], [3.3, 4.1], [4.6, 5.6], [5.6, 4.4], [6.5, 5.0], [7.6, 3.5]]
+  [
+    [-7.6, 3.5],
+    [-6.3, 5.0],
+    [-5.5, 4.2],
+    [-4.2, 5.5],
+    [-3.0, 4.3],
+    [-2.2, 4.7],
+    [-1.3, 3.6]
+  ],
+  [
+    [1.3, 3.6],
+    [2.4, 4.6],
+    [3.3, 4.1],
+    [4.6, 5.6],
+    [5.6, 4.4],
+    [6.5, 5.0],
+    [7.6, 3.5]
+  ]
 ];
 
 const drawMountainRange = (ctx, range) => {
@@ -255,7 +281,12 @@ const drawBookplate = (ctx) => {
   ctx.strokeRect(-1.25 * U, -0.95 * U, 2.5 * U, 1.9 * U);
   ctx.lineWidth = 0.8;
   ctx.strokeRect(-1.1 * U, -0.8 * U, 2.2 * U, 1.6 * U);
-  [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([a, b]) => circle(ctx, a * 1.1 * U, b * 0.8 * U, 0.16 * U));
+  [
+    [-1, -1],
+    [1, -1],
+    [-1, 1],
+    [1, 1]
+  ].forEach(([a, b]) => circle(ctx, a * 1.1 * U, b * 0.8 * U, 0.16 * U));
   centeredText(ctx, fontCaps(22), 'EX LIBRIS', 0, -0.32 * U);
   centeredText(ctx, fontClassic(30, 'italic 600'), 'L. T.', 0, 0.22 * U);
   ctx.beginPath();
@@ -279,7 +310,11 @@ const drawDie = (ctx) => {
   ctx.lineTo(1.05 * U, 0.35 * U);
   ctx.lineTo(0.7 * U, 0.7 * U);
   ctx.stroke();
-  [[-0.35, -0.35], [0, 0], [0.35, 0.35]].forEach(([a, b]) => {
+  [
+    [-0.35, -0.35],
+    [0, 0],
+    [0.35, 0.35]
+  ].forEach(([a, b]) => {
     ctx.beginPath();
     ctx.arc(a * U, b * U, 5, 0, 7);
     ctx.fill();
@@ -312,7 +347,12 @@ const drawPotionFlask = (ctx) => {
   ctx.arc(0, 0.25 * U, 0.85 * U, 0.1, Math.PI - 0.1);
   ctx.fill();
   ctx.restore();
-  [[-0.2, -0.1, 5], [0.15, -0.45, 4], [-0.05, -0.8, 3], [0.25, 0.05, 3]].forEach(([a, b, r]) => circle(ctx, a * U, b * U, r));
+  [
+    [-0.2, -0.1, 5],
+    [0.15, -0.45, 4],
+    [-0.05, -0.8, 3],
+    [0.25, 0.05, 3]
+  ].forEach(([a, b, r]) => circle(ctx, a * U, b * U, r));
   sparkle(ctx, 0.7 * U, -1.3 * U, 10);
   ctx.restore();
 };
@@ -343,7 +383,11 @@ const drawHeraldicShield = (ctx) => {
   ctx.lineTo(0, -0.15 * U);
   ctx.lineTo(0.7 * U, 0.45 * U);
   ctx.stroke();
-  [[-0.4, -0.5], [0.4, -0.5], [0, 0.6]].forEach(([a, b]) => sparkle(ctx, a * U, b * U, 9));
+  [
+    [-0.4, -0.5],
+    [0.4, -0.5],
+    [0, 0.6]
+  ].forEach(([a, b]) => sparkle(ctx, a * U, b * U, 9));
   ctx.restore();
 };
 
@@ -428,7 +472,7 @@ const drawGlobe = (ctx) => {
 const drawWaxSeal = (ctx) => {
   circle(ctx, X(5.9), Y(-6.4), 0.42 * U);
   for (let k = 0; k < 10; k++) {
-    const a = k / 10 * Math.PI * 2;
+    const a = (k / 10) * Math.PI * 2;
     circle(ctx, X(5.9) + Math.cos(a) * 0.5 * U, Y(-6.4) + Math.sin(a) * 0.5 * U, 4);
   }
   centeredText(ctx, fontCaps(24), 'LT', X(5.9), Y(-6.4));
@@ -456,7 +500,21 @@ export const DECORATIONS = {
   }),
   stack: engraved(0.72, (ctx) => {
     ctx.lineWidth = 1.3;
-    drawWorkflow(ctx, [[3.2, -5.4], [5.0, -4.4], [5.0, -6.4], [6.8, -5.4]], [[0, 1], [0, 2], [1, 3], [2, 3]]);
+    drawWorkflow(
+      ctx,
+      [
+        [3.2, -5.4],
+        [5.0, -4.4],
+        [5.0, -6.4],
+        [6.8, -5.4]
+      ],
+      [
+        [0, 1],
+        [0, 2],
+        [1, 3],
+        [2, 3]
+      ]
+    );
     caption(ctx, 'workflow', 5.0, -7.2, 22);
     caption(ctx, '{ }', -6.4, -5.6, 64, 'italic 600');
     caption(ctx, '=>', 6.6, 5.6, 54, 'italic 600');

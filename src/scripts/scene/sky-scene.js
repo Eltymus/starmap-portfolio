@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { CHAPTERS, CHAPTER_COUNT, chapterSkyAngles } from '../../data/chapters.js';
 import { clamp, easeInOutCubic } from '../../lib/math.js';
+import { formatSkyCoordinates } from '../../lib/sky-coordinates.js';
 import { drawChapterArt } from '../art/chapter-art.js';
 import { loadEngravingImages } from '../art/engravings.js';
 import { state } from '../state.js';
@@ -12,6 +13,7 @@ import { createConstellationLabelTexture } from './textures.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
 const ORIGIN = new THREE.Vector3();
+const FORWARD = new THREE.Vector3(0, 0, -1);
 const ART_BUILD_TIMEOUT = 2500;
 const ART_FONTS = ['600 40px Cinzel', 'italic 600 40px "Cormorant Garamond"', 'italic 500 40px "Cormorant Garamond"'];
 
@@ -19,16 +21,6 @@ const preferredPixelRatio = () => {
   const device = window.devicePixelRatio || 1;
   const pixels = innerWidth * innerHeight;
   return Math.min(device, pixels > 2.2e6 ? 1 : pixels > 1.3e6 ? 1.25 : 1.5);
-};
-
-const pad2 = (value) => String(value).padStart(2, '0');
-
-const formatSkyCoordinates = (camera) => {
-  const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-  let rightAscension = Math.atan2(forward.x, -forward.z) / (Math.PI * 2) * 24;
-  if (rightAscension < 0) rightAscension += 24;
-  const declination = Math.asin(clamp(forward.y, -1, 1)) * 180 / Math.PI;
-  return 'RA ' + pad2(Math.floor(rightAscension)) + 'h ' + pad2(Math.floor((rightAscension % 1) * 60)) + 'm · DEC ' + (declination >= 0 ? '+' : '−') + pad2(Math.abs(Math.round(declination))) + '°';
 };
 
 const createAdaptiveResolution = (renderer, getSize) => {
@@ -53,7 +45,13 @@ const createAdaptiveResolution = (renderer, getSize) => {
 };
 
 export const startSkyScene = ({ canvas, coordsElement, onHover, onStart }) => {
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: true, powerPreference: 'high-performance', stencil: false });
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    antialias: false,
+    alpha: true,
+    powerPreference: 'high-performance',
+    stencil: false
+  });
   renderer.setPixelRatio(preferredPixelRatio());
   let width = 1;
   let height = 1;
@@ -90,7 +88,8 @@ export const startSkyScene = ({ canvas, coordsElement, onHover, onStart }) => {
     paintStarNames();
   };
   const imagesReady = loadEngravingImages();
-  if (document.fonts && document.fonts.load) Promise.all([imagesReady, ...ART_FONTS.map((font) => document.fonts.load(font))]).then(buildArt, buildArt);
+  if (document.fonts && document.fonts.load)
+    Promise.all([imagesReady, ...ART_FONTS.map((font) => document.fonts.load(font))]).then(buildArt, buildArt);
   setTimeout(buildArt, ART_BUILD_TIMEOUT);
 
   addOrnaments();
@@ -118,7 +117,10 @@ export const startSkyScene = ({ canvas, coordsElement, onHover, onStart }) => {
     const raw = progress - from;
     const eased = easeInOutCubic(raw);
     viewDirection.copy(directions[from]).lerp(directions[to], eased).normalize();
-    const look = viewDirection.clone().add(new THREE.Vector3(state.parallax.x * 0.06, -state.parallax.y * 0.04, 0)).normalize();
+    const look = viewDirection
+      .clone()
+      .add(new THREE.Vector3(state.parallax.x * 0.06, -state.parallax.y * 0.04, 0))
+      .normalize();
     targetRotation.setFromRotationMatrix(lookMatrix.lookAt(ORIGIN, look, new THREE.Vector3(0, 1, 0)));
     camera.quaternion.slerp(targetRotation, 0.055);
     const narrow = width / height < 0.9;
@@ -126,7 +128,15 @@ export const startSkyScene = ({ canvas, coordsElement, onHover, onStart }) => {
 
     let hoverInfo = null;
     constellations.forEach((constellation, index) => {
-      const info = constellation.update({ index, isActive: index === state.activeChapter, time, dt, camera, canvasRect, pointer: state.pointer });
+      const info = constellation.update({
+        index,
+        isActive: index === state.activeChapter,
+        time,
+        dt,
+        camera,
+        canvasRect,
+        pointer: state.pointer
+      });
       if (info) hoverInfo = info;
     });
     onHover(hoverInfo);
@@ -135,7 +145,14 @@ export const startSkyScene = ({ canvas, coordsElement, onHover, onStart }) => {
 
     const target = narrow ? 0 : (CHAPTERS[from].side + (CHAPTERS[to].side - CHAPTERS[from].side) * eased) * 0.27;
     sideShift += (target - sideShift) * 0.07;
-    camera.setViewOffset(width, height, -sideShift * Math.min(width, 1700) * 0.5, narrow ? height * 0.17 : 0, width, height);
+    camera.setViewOffset(
+      width,
+      height,
+      -sideShift * Math.min(width, 1700) * 0.5,
+      narrow ? height * 0.17 : 0,
+      width,
+      height
+    );
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
 
@@ -145,7 +162,7 @@ export const startSkyScene = ({ canvas, coordsElement, onHover, onStart }) => {
     coordsElapsed += dt;
     if (coordsElapsed > 120) {
       coordsElapsed = 0;
-      coordsElement.textContent = formatSkyCoordinates(camera);
+      coordsElement.textContent = formatSkyCoordinates(FORWARD.clone().applyQuaternion(camera.quaternion));
     }
     if (!started) {
       started = true;

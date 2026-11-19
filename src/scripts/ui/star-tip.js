@@ -6,7 +6,8 @@ const OFFSET_Y = 22;
 const VIEWPORT_MARGIN = 8;
 const OBSTACLES = '.chapter.is-active .panel, #moons, header .header-meta, header .logo, #coords, #scroll-hint';
 
-const overlaps = (box, rect) => !(box.r <= rect.left || box.l >= rect.right || box.b <= rect.top || box.t >= rect.bottom);
+const overlaps = (box, rect) =>
+  !(box.r <= rect.left || box.l >= rect.right || box.b <= rect.top || box.t >= rect.bottom);
 
 export const createStarTip = () => {
   const tip = document.getElementById('star-tip');
@@ -23,7 +24,9 @@ export const createStarTip = () => {
   const choosePlacement = (x, y) => {
     const width = tip.offsetWidth;
     const height = tip.offsetHeight;
-    const obstacles = [...document.querySelectorAll(OBSTACLES)].map((element) => element.getBoundingClientRect()).filter((rect) => rect.width);
+    const obstacles = [...document.querySelectorAll(OBSTACLES)]
+      .map((element) => element.getBoundingClientRect())
+      .filter((rect) => rect.width);
     const candidates = [
       ['up-right', x + OFFSET_X, y - OFFSET_Y - height],
       ['up-left', x - OFFSET_X - width, y - OFFSET_Y - height],
@@ -35,7 +38,13 @@ export const createStarTip = () => {
     candidates.forEach((candidate) => {
       const box = { l: candidate[1], t: candidate[2], r: candidate[1] + width, b: candidate[2] + height };
       let score = 0;
-      if (box.l > VIEWPORT_MARGIN && box.t > VIEWPORT_MARGIN && box.r < window.innerWidth - VIEWPORT_MARGIN && box.b < window.innerHeight - VIEWPORT_MARGIN) score += 2;
+      if (
+        box.l > VIEWPORT_MARGIN &&
+        box.t > VIEWPORT_MARGIN &&
+        box.r < window.innerWidth - VIEWPORT_MARGIN &&
+        box.b < window.innerHeight - VIEWPORT_MARGIN
+      )
+        score += 2;
       if (!obstacles.some((rect) => overlaps(box, rect))) score += 3;
       if (score > best) {
         best = score;

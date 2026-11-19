@@ -2,7 +2,18 @@
 import { CHAPTERS } from '../data/chapters.js';
 import MoonPhase from './MoonPhase.astro';
 ---
+
 <nav id="moons" aria-label="Constellations">
-  <div id="moon-track"><i id="moon-progress"></i></div>
-  {CHAPTERS.map((chapter, i) => <button type="button" aria-label={chapter.name}><span><b>{chapter.numeral}</b>{chapter.name}</span><MoonPhase phase={i} /></button>)}
+  <div id="moon-track">
+    <i id="moon-progress"></i>
+  </div>
+  {CHAPTERS.map((chapter, i) => (
+    <button type="button" aria-label={chapter.name}>
+      <span>
+        <b>{chapter.numeral}</b>
+        {chapter.name}
+      </span>
+      <MoonPhase phase={i} />
+    </button>
+  ))}
 </nav>

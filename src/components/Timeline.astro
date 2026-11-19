@@ -5,4 +5,12 @@ interface Props {
 
 const { rows } = Astro.props;
 ---
-<div class="timeline">{rows.map(([role, period]) => <div class="timeline-row"><span>{role}</span><span>{period}</span></div>)}</div>
+
+<div class="timeline">
+  {rows.map(([role, period]) => (
+    <div class="timeline-row">
+      <span>{role}</span>
+      <span>{period}</span>
+    </div>
+  ))}
+</div>
