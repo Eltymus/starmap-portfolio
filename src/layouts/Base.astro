@@ -14,6 +14,7 @@ import cinzel600 from '@fontsource/cinzel/files/cinzel-latin-600-normal.woff2?ur
 import cormorant500Italic from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-italic.woff2?url';
 import { PERSON } from '../data/person';
 import { assetUrl, PORTRAIT_URL } from '../lib/assets';
+import { CONTENT_SECURITY_POLICY } from '../lib/csp';
 import { COLORS } from '../lib/theme';
 
 interface Props {
@@ -58,6 +59,10 @@ const jsonLd = JSON.stringify(person).replace(/</g, '\\u003c');
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    {
+      /* Production only: the dev server injects inline scripts and talks to Vite over a WebSocket. */
+      import.meta.env.PROD && <meta http-equiv="Content-Security-Policy" content={CONTENT_SECURITY_POLICY} />
+    }
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="preload" href={cinzel600} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={cormorant500Italic} as="font" type="font/woff2" crossorigin />

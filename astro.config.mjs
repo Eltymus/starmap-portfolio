@@ -7,6 +7,8 @@ export default defineConfig({
   base: '/starmap-portfolio',
   trailingSlash: 'always',
   integrations: [sitemap()],
+  // Every stylesheet is a file, never an inline <style>: the Content-Security-Policy (src/lib/csp.ts) relies on it.
+  build: { inlineStylesheets: 'never' },
   vite: {
     build: {
       // three's WebGLRenderer and its shaders alone are ~550 kB minified (~140 kB gzip) and cannot be split

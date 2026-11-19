@@ -68,6 +68,14 @@ Screenshot baselines live in `tests/e2e/__screenshots__/`, one set per platform.
   (`<user>.github.io/<repo>/`) crawlers only read the `robots.txt` at the domain root, so the sitemap is also linked from
   `<head>` and can be submitted in Google Search Console.
 
+## Security
+
+- GitHub Pages cannot send custom headers, so the Content-Security-Policy is a `<meta>` tag, built from `src/lib/csp.ts`
+  and added to production builds only (the dev server needs inline scripts). It allows scripts, stylesheets and fonts from
+  the site itself, `data:` images (the chart-sheet engravings) and inline style attributes. `frame-ancestors` cannot be
+  set from a meta tag.
+- An end-to-end test uses the whole site (WebGL sky, chart sheet, full map, 404) and fails on any CSP violation.
+
 ## Deploy (GitHub Pages)
 
 1. Push to the `main` branch of `github.com/<user>/starmap-portfolio`.

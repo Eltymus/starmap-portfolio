@@ -21,8 +21,10 @@ export const goToChapter = async (page: Page, index: number) => {
  * (software WebGL in CI is slow) and compare only the DOM on top.
  */
 export const hideSky = async (page: Page) => {
-  await page.addStyleTag({ content: '#sky-canvas,#coords{visibility:hidden!important}' });
+  // Inline styles set from script, not a <style> tag: the Content-Security-Policy blocks injected stylesheets.
   await page.evaluate(() => {
+    for (const element of document.querySelectorAll<HTMLElement>('#sky-canvas, #coords'))
+      element.style.setProperty('visibility', 'hidden', 'important');
     window.requestAnimationFrame = () => 0;
   });
 };
