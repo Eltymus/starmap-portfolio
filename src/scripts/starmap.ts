@@ -17,7 +17,7 @@ export function startStarMap(): void {
   let sheet: ChartSheet | null = null;
   const navigation = createNavigation({
     onChapterChange: () => {
-      if (sheet && sheet.isOpen) sheet.close();
+      sheet?.dismiss();
     }
   });
   const chartSheet = createChartSheet({ goTo: navigation.goTo });

@@ -73,6 +73,8 @@ export interface ConstellationFrame {
   isActive: boolean;
   time: number;
   dt: number;
+  /** Reduced motion: draw at once, without sparks. */
+  still: boolean;
   camera: THREE.Camera;
   canvasRect: DOMRect;
   pointer: Pointer;
@@ -122,6 +124,7 @@ export class Constellation {
   private hovered = -1;
   private lastDrawn: number | undefined = undefined;
   private sizesSettled = false;
+  private still = false;
   private dustActive = false;
 
   constructor(chapter: Chapter, direction: THREE.Vector3, scene: THREE.Scene) {
@@ -306,8 +309,8 @@ export class Constellation {
 
   private ignite(vertex: number, x: number, y: number, isActive: boolean, dustCount: number): void {
     this.lit[vertex] = 1;
-    this.flash[vertex] = 1;
-    if (isActive) {
+    this.flash[vertex] = this.still ? 0 : 1;
+    if (isActive && !this.still) {
       this.burst(x, y);
       this.emitDust(x, y, dustCount);
     }
@@ -465,10 +468,11 @@ export class Constellation {
   }
 
   /** Advances one frame; returns the star note under the pointer, if any. */
-  update({ index, isActive, time, dt, camera, canvasRect, pointer }: ConstellationFrame): HoveredNote | null {
+  update({ index, isActive, time, dt, still, camera, canvasRect, pointer }: ConstellationFrame): HoveredNote | null {
+    this.still = still;
     if (isActive) {
       this.visited = true;
-      this.drawn = Math.min(this.totalLength, this.drawn + dt * DRAW_SPEED);
+      this.drawn = still ? this.totalLength : Math.min(this.totalLength, this.drawn + dt * DRAW_SPEED);
     }
     const penPositions: PenPosition[] = new Array(this.trailCount).fill(null);
     this.updateStrokes(isActive, penPositions);
@@ -476,7 +480,7 @@ export class Constellation {
     const done = this.drawn >= this.totalLength - 1e-3;
     if (done && !this.done) {
       this.done = true;
-      if (isActive) {
+      if (isActive && !still) {
         for (let v = 0; v < this.baseSizes.length; v++) this.flash[v] = 1.2;
         this.burst(0, 0, true);
       }

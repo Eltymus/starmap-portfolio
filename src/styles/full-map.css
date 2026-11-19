@@ -5,16 +5,6 @@
   z-index: 19;
 }
 
-#full-map:not(.is-open) {
-  visibility: hidden;
-  transition: visibility 0s 0.6s;
-}
-
-#full-map.is-open {
-  visibility: visible;
-  transition: none;
-}
-
 .full-map-dialog {
   position: relative;
   display: flex;
@@ -134,9 +124,11 @@
   letter-spacing: 0.35px;
   fill: var(--gold);
   text-anchor: middle;
+  text-transform: uppercase;
 }
 
 #full-map-svg .constellation text.subtitle {
+  text-transform: none;
   font-family: var(--font-classic);
   font-style: italic;
   font-weight: 500;
@@ -176,6 +168,6 @@
   text-anchor: middle;
 }
 
-#full-map-svg .constellation.here .here-label {
+#full-map-svg .constellation.here + .here-label {
   opacity: 1;
 }

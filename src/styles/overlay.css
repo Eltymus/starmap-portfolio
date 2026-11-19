@@ -1,11 +1,30 @@
+/* Full-screen native <dialog>: the dialog itself is the dimmed, blurred backdrop. */
 .overlay {
   position: fixed;
   inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  color: inherit;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgb(var(--abyss-rgb) / 0%);
   pointer-events: none;
+}
+
+/* Closed dialogs are hidden, except while they fade out (inert, see dialog.ts). */
+.overlay:not([open], .is-closing) {
+  display: none;
+}
+
+.overlay::backdrop {
+  background: transparent;
 }
 
 .overlay.is-open {

@@ -1,6 +1,12 @@
 .cameo {
   position: relative;
   margin: 0 0 6px 7px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
   display: flex;
   align-items: center;
   gap: 20px;
@@ -51,7 +57,8 @@
     transform 0.9s var(--ease-out);
 }
 
-.cameo:hover img {
+.cameo:hover img,
+.cameo:focus-visible img {
   filter: none;
   transform: scale(1.04);
   box-shadow:
@@ -59,7 +66,7 @@
     0 0 36px rgb(var(--gold-rgb) / 35%);
 }
 
-.cameo figcaption {
+.cameo-caption {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -68,7 +75,7 @@
   line-height: 1.2;
 }
 
-.cameo figcaption b {
+.cameo-caption b {
   font: 600 10px var(--font-caps);
   letter-spacing: 0.22em;
   color: rgb(var(--gold-rgb) / 60%);

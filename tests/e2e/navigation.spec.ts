@@ -30,7 +30,7 @@ test.describe('chart sheet', () => {
     const opener = page.locator('.chapter').nth(2).locator('.open-chart');
     await opener.click();
 
-    const sheet = page.getByRole('dialog', { name: 'Chart' });
+    const sheet = page.locator('#chart-sheet');
     await expect(sheet).toBeVisible();
     await expect(sheet.getByRole('heading', { level: 2 })).toHaveText('The stack');
     await expect(page.locator('.sheet-close')).toBeFocused();
@@ -44,13 +44,53 @@ test.describe('chart sheet', () => {
     await expect(page.locator('.chapter').nth(3)).toHaveClass(/is-active/);
   });
 
-  test('keeps keyboard focus inside while open', async ({ page }) => {
+  test('is a modal dialog named after the page being read', async ({ page }) => {
+    await page.locator('.chapter').nth(0).locator('.open-chart').click();
+    await expect(page.getByRole('dialog', { name: 'Lorenzo Tripodi' })).toBeVisible();
+    expect(await page.locator('#chart-sheet').evaluate((dialog) => dialog.matches(':modal'))).toBe(true);
+  });
+
+  test('never lets Tab reach the page behind it', async ({ page }) => {
     await page.locator('.chapter').nth(0).locator('.open-chart').click();
     await expect(page.locator('.sheet-close')).toBeFocused();
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 12; i++) {
       await page.keyboard.press('Tab');
-      expect(await page.evaluate(() => !!document.activeElement?.closest('#chart-sheet'))).toBe(true);
+      const outside = await page.evaluate(() => {
+        const active = document.activeElement;
+        return !!active && active !== document.body && !active.closest('#chart-sheet');
+      });
+      expect(outside).toBe(false);
     }
+  });
+
+  test('keeps its buttons out of the Tab order while closed', async ({ page }) => {
+    await page.locator('.chapter').nth(0).locator('.open-chart').click();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#chart-sheet')).toBeHidden();
+    for (let i = 0; i < 25; i++) {
+      await page.keyboard.press('Tab');
+      expect(await page.evaluate(() => !!document.activeElement?.closest('#chart-sheet, #full-map'))).toBe(false);
+    }
+  });
+
+  test('lists the star notes for keyboard and screen reader users', async ({ page }) => {
+    await page.locator('.chapter').nth(0).locator('.open-chart').click();
+    const notes = page.locator('#chart-sheet .star-notes');
+    await notes.getByText('THE STARS').click();
+    await expect(notes.getByRole('listitem')).toHaveText([
+      'Lorenzo Tripodi',
+      'Software Developer — full-stack',
+      'AI & Automation — n8n and LLM agents',
+      'Vue · Nuxt · React · Node.js',
+      'Based in Turin, Italy · Remote / Hybrid'
+    ]);
+  });
+
+  test('Space presses a focused button instead of scrolling', async ({ page }) => {
+    await page.locator('.chapter').nth(0).locator('.open-chart').focus();
+    await page.keyboard.press(' ');
+    await expect(page.locator('#chart-sheet')).toBeVisible();
+    await expect(page.locator('.chapter').nth(0)).toHaveClass(/is-active/);
   });
 
   test('returns focus to the button that opened it', async ({ page }) => {

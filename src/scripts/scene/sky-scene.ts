@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { CHAPTERS, CHAPTER_COUNT, chapterSkyAngles } from '../../data/chapters';
 import { clamp, easeInOutCubic } from '../../lib/math';
+import { prefersReducedMotion } from '../../lib/motion';
 import { formatSkyCoordinates } from '../../lib/sky-coordinates';
 import { drawChapterArt } from '../art/chapter-art';
 import { loadEngravingImages } from '../art/engravings';
@@ -118,7 +119,11 @@ export const startSkyScene = ({ canvas, coordsElement, onHover, onStart }: SkySc
   const frame = (time: number): void => {
     const dt = Math.min(50, time - (lastTime || time));
     lastTime = time;
-    setStarTime(time);
+    // Reduced motion: the camera jumps, nothing twinkles or drifts, constellations appear already drawn.
+    const still = prefersReducedMotion();
+    const clock = still ? 0 : time;
+    const ease = (rate: number) => (still ? 1 : rate);
+    setStarTime(clock);
 
     const progress = clamp(state.scrollProgress, 0, CHAPTER_COUNT - 1);
     const from = Math.floor(progress);
@@ -128,20 +133,21 @@ export const startSkyScene = ({ canvas, coordsElement, onHover, onStart }: SkySc
     viewDirection.copy(directions[from]).lerp(directions[to], eased).normalize();
     const look = viewDirection
       .clone()
-      .add(new THREE.Vector3(state.parallax.x * 0.06, -state.parallax.y * 0.04, 0))
+      .add(still ? ORIGIN : new THREE.Vector3(state.parallax.x * 0.06, -state.parallax.y * 0.04, 0))
       .normalize();
     targetRotation.setFromRotationMatrix(lookMatrix.lookAt(ORIGIN, look, new THREE.Vector3(0, 1, 0)));
-    camera.quaternion.slerp(targetRotation, 0.055);
+    camera.quaternion.slerp(targetRotation, ease(0.055));
     const narrow = width / height < 0.9;
-    camera.fov += ((narrow ? 72 : 52) + Math.sin(raw * Math.PI) * 10 - camera.fov) * 0.08;
+    camera.fov += ((narrow ? 72 : 52) + Math.sin(raw * Math.PI) * 10 - camera.fov) * ease(0.08);
 
     let hoverInfo = null;
     constellations.forEach((constellation, index) => {
       const info = constellation.update({
         index,
         isActive: index === state.activeChapter,
-        time,
+        time: clock,
         dt,
+        still,
         camera,
         canvasRect,
         pointer: state.pointer
@@ -150,10 +156,10 @@ export const startSkyScene = ({ canvas, coordsElement, onHover, onStart }: SkySc
     });
     onHover(hoverInfo);
 
-    updateShootingStar(time, dt, viewDirection);
+    updateShootingStar(time, dt, viewDirection, !still);
 
     const target = narrow ? 0 : (CHAPTERS[from].side + (CHAPTERS[to].side - CHAPTERS[from].side) * eased) * 0.27;
-    sideShift += (target - sideShift) * 0.07;
+    sideShift += (target - sideShift) * ease(0.07);
     camera.setViewOffset(
       width,
       height,

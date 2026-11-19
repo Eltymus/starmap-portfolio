@@ -27,6 +27,13 @@ npm run preview
 
 Screenshot baselines live in `tests/e2e/__screenshots__/`, one set per platform. CI compares against the Linux set; after an intentional visual change, refresh it with `npm run build && npm run test:e2e:linux -- --update-snapshots` (and `npm run test:e2e:update` for the local set).
 
+## Accessibility
+
+- The chart sheet and the full map are native `<dialog>` elements opened with `showModal()`: the page behind is inert, Escape closes them and focus returns to the control that opened them.
+- Every star note shown on hover is also listed under **The stars** at the end of each chart sheet, for keyboard and screen reader users.
+- With `prefers-reduced-motion`, scrolling is instant, CSS animations stop, and the 3D sky stops twinkling: constellations appear already drawn, without sparks or shooting stars.
+- An axe-core scan of the page and of both dialogs runs in the end-to-end suite.
+
 ## Where things live
 
 | Path                     | What                                                                                                                              |

@@ -19,7 +19,12 @@ export const createShootingStar = (scene: THREE.Scene) => {
   let current: { origin: THREE.Vector3; velocity: THREE.Vector3; t: number } | null = null;
   let nextAt = 3000;
 
-  return (time: number, dt: number, viewDirection: THREE.Vector3): void => {
+  return (time: number, dt: number, viewDirection: THREE.Vector3, enabled: boolean): void => {
+    if (!enabled) {
+      current = null;
+      material.opacity = 0;
+      return;
+    }
     if (!current && time > nextAt) {
       const origin = viewDirection
         .clone()

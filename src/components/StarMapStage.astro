@@ -6,15 +6,15 @@ import SiteHeader from './SiteHeader.astro';
 ---
 
 <div id="stage">
-  <canvas
-    id="sky-canvas"
-    role="img"
-    aria-label="A gold-on-navy star map; each section draws its own constellation"
-  ></canvas>
+  <canvas id="sky-canvas" aria-hidden="true"></canvas>
   <Frame />
   <SiteHeader />
-  <div id="coords">RA 00h 00m · DEC +00°</div>
+  <div id="coords" aria-hidden="true">
+    RA 00h 00m · DEC +00°
+  </div>
   <MoonNav />
-  <div id="scroll-hint">SCROLL TO CHART</div>
+  <div id="scroll-hint" aria-hidden="true">
+    SCROLL TO CHART
+  </div>
   <IntroSplash />
 </div>

@@ -1,70 +1,58 @@
 const OPEN_CLASS = 'is-open';
-
-const tabbableElements = (root: HTMLElement) =>
-  [...root.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], [tabindex="0"]')].filter(
-    (element) => element.getClientRects().length && getComputedStyle(element).visibility !== 'hidden'
-  );
+const CLOSING_CLASS = 'is-closing';
 
 export interface Dialog {
-  root: HTMLElement;
   open: () => void;
   close: () => void;
-  trapTab: (event: KeyboardEvent) => void;
   readonly isOpen: boolean;
 }
 
-export const createDialog = (root: HTMLElement, initialFocus: HTMLElement): Dialog => {
-  let isOpen = false;
-  let returnFocus: HTMLElement | null = null;
+interface DialogOptions {
+  /** How long the closing fade lasts, in ms; the dialog stays visible but inert meanwhile. */
+  fadeOut: number;
+  /** Called after every close: button, Escape, backdrop click or code. */
+  onClose?: () => void;
+}
+
+/**
+ * Animated wrapper around a native modal <dialog>. The browser makes the rest of the page inert,
+ * closes on Escape and gives focus back to the element that opened it; this adds the fade in and out.
+ */
+export const createDialog = (dialog: HTMLDialogElement, { fadeOut, onClose }: DialogOptions): Dialog => {
+  let fadeTimer: ReturnType<typeof setTimeout> | undefined;
+
+  const finishFade = () => {
+    clearTimeout(fadeTimer);
+    dialog.classList.remove(CLOSING_CLASS);
+    dialog.inert = false;
+  };
 
   const open = () => {
-    returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    root.classList.add(OPEN_CLASS);
-    root.setAttribute('aria-hidden', 'false');
-    isOpen = true;
-    initialFocus.focus({ preventScroll: true });
+    if (dialog.open) return;
+    finishFade();
+    dialog.showModal();
+    // Flush styles so the opening transition starts from the closed state.
+    void dialog.offsetWidth;
+    dialog.classList.add(OPEN_CLASS);
   };
 
-  const close = () => {
-    if (!isOpen) return;
-    root.classList.remove(OPEN_CLASS);
-    root.setAttribute('aria-hidden', 'true');
-    isOpen = false;
-    if (
-      root.contains(document.activeElement) &&
-      returnFocus &&
-      returnFocus.isConnected &&
-      returnFocus !== document.body
-    )
-      returnFocus.focus({ preventScroll: true });
-    returnFocus = null;
-  };
+  dialog.addEventListener('close', () => {
+    dialog.classList.remove(OPEN_CLASS);
+    dialog.classList.add(CLOSING_CLASS);
+    dialog.inert = true;
+    fadeTimer = setTimeout(finishFade, fadeOut);
+    onClose?.();
+  });
 
-  const trapTab = (event: KeyboardEvent) => {
-    const focusable = tabbableElements(root);
-    if (!focusable.length) return;
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-    const current = document.activeElement;
-    if (!root.contains(current)) {
-      event.preventDefault();
-      (event.shiftKey ? last : first).focus();
-    } else if (event.shiftKey && current === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && current === last) {
-      event.preventDefault();
-      first.focus();
-    }
-  };
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
 
   return {
-    root,
     open,
-    close,
-    trapTab,
+    close: () => dialog.close(),
     get isOpen() {
-      return isOpen;
+      return dialog.open;
     }
   };
 };

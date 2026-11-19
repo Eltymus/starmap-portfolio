@@ -77,7 +77,7 @@ const constellationGroup = (chapter: Chapter, i: number): string => {
   const layout = { ...DEFAULT_LAYOUT, ...chapter.fullMap };
   const { points, edges } = chapter.figure;
   const image = chapterArtImageUrl(i);
-  let svg = `<g class="constellation" data-chapter="${i}" tabindex="0" role="button" aria-label="${chapter.name}" transform="translate(${cx.toFixed(2)} ${cy.toFixed(2)})"><circle class="halo" r="${layout.haloRadius}"/>`;
+  let svg = `<g class="constellation" data-chapter="${i}" tabindex="0" role="button" aria-labelledby="full-map-title-${i} full-map-subtitle-${i}" transform="translate(${cx.toFixed(2)} ${cy.toFixed(2)})"><circle class="halo" r="${layout.haloRadius}"/>`;
   if (image)
     svg += `<image href="${image}" x="${-8 * ART_SCALE}" y="${-8 * ART_SCALE}" width="${16 * ART_SCALE}" height="${16 * ART_SCALE}"/>`;
   edges.forEach(([a, b], e) => {
@@ -88,22 +88,23 @@ const constellationGroup = (chapter: Chapter, i: number): string => {
   });
   return (
     svg +
-    `<text y="${layout.titleY}">${chapter.name.toUpperCase()}</text><text class="subtitle" y="${layout.subtitleY}">${chapter.subtitle}</text><text class="here-label" y="-16.8">you are here</text></g>`
+    `<text id="full-map-title-${i}" y="${layout.titleY}">${chapter.name} </text><text id="full-map-subtitle-${i}" class="subtitle" y="${layout.subtitleY}">${chapter.subtitle}</text></g><text class="here-label" aria-hidden="true" transform="translate(${cx.toFixed(2)} ${cy.toFixed(2)})" y="-16.8">you are here</text>`
   );
 };
+
+const FADE_OUT = 600;
 
 export interface FullMap {
   open: () => void;
   close: () => void;
-  trapTab: (event: KeyboardEvent) => void;
   readonly isOpen: boolean;
 }
 
 export const createFullMap = ({ goTo }: { goTo: (index: number) => void }): FullMap => {
-  const root = byId('full-map');
+  const root = byId<HTMLDialogElement>('full-map');
   const svg = byId<HTMLElement>('full-map-svg');
   const closeButton = query(root, '.full-map-close');
-  const dialog = createDialog(root, closeButton);
+  const dialog = createDialog(root, { fadeOut: FADE_OUT });
   let built = false;
   let builtWithArt = false;
 
@@ -131,23 +132,24 @@ export const createFullMap = ({ goTo }: { goTo: (index: number) => void }): Full
 
   const open = () => {
     if (!built || !builtWithArt) build();
-    svg
-      .querySelectorAll<SVGGElement>('.constellation')
-      .forEach((group) => group.classList.toggle('here', Number(group.dataset.chapter) === state.activeChapter));
+    svg.querySelectorAll<SVGGElement>('.constellation').forEach((group) => {
+      const here = Number(group.dataset.chapter) === state.activeChapter;
+      group.classList.toggle('here', here);
+      if (here) group.setAttribute('aria-current', 'location');
+      else group.removeAttribute('aria-current');
+    });
     dialog.open();
   };
 
   byId('full-map-button').onclick = open;
   closeButton.onclick = close;
   root.addEventListener('click', (event) => {
-    const target = event.target as Element;
-    if (target === root || target.classList.contains('full-map-dialog')) close();
+    if ((event.target as Element).classList.contains('full-map-dialog')) close();
   });
 
   return {
     open,
     close,
-    trapTab: dialog.trapTab,
     get isOpen() {
       return dialog.isOpen;
     }

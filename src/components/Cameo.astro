@@ -2,11 +2,11 @@
 import { PORTRAIT_URL } from '../lib/assets';
 ---
 
-<figure class="cameo" role="button" tabindex="0" aria-label="Open the chart of Laurentius">
+<button class="cameo" type="button">
   <span class="cameo-frame">
-    <img alt="Portrait of Lorenzo Tripodi" src={PORTRAIT_URL} />
+    <img alt="" src={PORTRAIT_URL} />
   </span>
-  <figcaption>
-    <b>PORTRAIT</b>Lorenzo · Turin
-  </figcaption>
-</figure>
+  <span class="cameo-caption">
+    <b>PORTRAIT</b>Lorenzo · Turin<span class="visually-hidden"> — open the chart of Laurentius</span>
+  </span>
+</button>

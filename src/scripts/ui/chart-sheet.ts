@@ -3,36 +3,44 @@ import { clamp } from '../../lib/math';
 import { chapterArtImageUrl } from '../art/chapter-art';
 import { state } from '../state';
 import { createDialog } from './dialog';
-import { activateOnEnterOrSpace, byId, query } from './dom';
+import { byId, query } from './dom';
 
 const PAGE_TURN = 260;
 const NAVIGATE_AFTER_CLOSE = 300;
+const FADE_OUT = 1000;
 
 export interface ChartSheet {
   open: (index: number) => void;
   /** Turns one page forward (1) or back (-1). */
   turn: (direction: number) => void;
-  /** Closes the sheet and travels to the chapter of the page being read. */
-  requestClose: () => void;
-  /** Closes the sheet and stays where the page is. */
-  close: () => void;
-  trapTab: (event: KeyboardEvent) => void;
+  /** Closes the sheet and stays on the current chapter, even if another page was being read. */
+  dismiss: () => void;
   readonly isOpen: boolean;
 }
 
 export const createChartSheet = ({ goTo }: { goTo: (index: number) => void }): ChartSheet => {
-  const root = byId('chart-sheet');
+  const root = byId<HTMLDialogElement>('chart-sheet');
   const sheet = query(root, '.sheet');
   const art = query(root, '.sheet-art');
   const body = query(root, '.sheet-body');
-  const footer = query(root, '.sheet-footer');
   const prev = query<HTMLButtonElement>(root, '.sheet-prev');
   const next = query<HTMLButtonElement>(root, '.sheet-next');
-  const counter = query(footer, 'span');
+  const counter = query(root, '.sheet-counter');
+  const announcer = query(root, '.sheet-announcer');
   const closeButton = query<HTMLButtonElement>(root, '.sheet-close');
   const pages = [...document.querySelectorAll<HTMLTemplateElement>('template[data-sheet]')];
-  const dialog = createDialog(root, closeButton);
   let current = 0;
+  let travelOnClose = true;
+
+  // Closing (button, Escape or backdrop) travels to the chapter of the page being read.
+  const dialog = createDialog(root, {
+    fadeOut: FADE_OUT,
+    onClose: () => {
+      const index = current;
+      if (travelOnClose && index !== state.activeChapter) setTimeout(() => goTo(index), NAVIGATE_AFTER_CLOSE);
+      travelOnClose = true;
+    }
+  });
 
   const fill = (index: number) => {
     body.replaceChildren(pages[index].content.cloneNode(true));
@@ -49,6 +57,7 @@ export const createChartSheet = ({ goTo }: { goTo: (index: number) => void }): C
   const open = (index: number) => {
     current = index;
     fill(index);
+    announcer.textContent = '';
     dialog.open();
   };
 
@@ -57,42 +66,36 @@ export const createChartSheet = ({ goTo }: { goTo: (index: number) => void }): C
     if (target === current) return;
     current = target;
     sheet.classList.add('is-turning');
-    const focusOnFooter = !!document.activeElement?.closest('.sheet-footer');
     setTimeout(() => {
       fill(target);
       sheet.classList.remove('is-turning');
-      const lostFocus = focusOnFooter && !root.contains(document.activeElement);
-      const focusDisabled = document.activeElement instanceof HTMLButtonElement && document.activeElement.disabled;
-      if (lostFocus || focusDisabled)
+      announcer.textContent = `Chart ${target + 1} of ${CHAPTER_COUNT}: ${pages[target].dataset.title}`;
+      const focused = document.activeElement;
+      if (focused instanceof HTMLButtonElement && focused.disabled)
         (root.querySelector<HTMLButtonElement>('.sheet-footer button:not([disabled])') ?? closeButton).focus({
           preventScroll: true
         });
     }, PAGE_TURN);
   };
 
-  closeButton.onclick = () => {
-    const index = current;
-    dialog.close();
-    if (index !== state.activeChapter) setTimeout(() => goTo(index), NAVIGATE_AFTER_CLOSE);
-  };
+  closeButton.onclick = dialog.close;
   prev.onclick = () => turn(-1);
   next.onclick = () => turn(1);
-  root.addEventListener('click', (event) => {
-    if (event.target === root) closeButton.click();
-  });
 
   document.querySelectorAll('.chapter').forEach((chapter, i) => {
     query(chapter, '.open-chart').onclick = () => open(i);
   });
-  const cameo = document.querySelector<HTMLElement>('.cameo');
-  if (cameo) activateOnEnterOrSpace(cameo, () => open(0));
+  const cameo = document.querySelector<HTMLButtonElement>('.cameo');
+  if (cameo) cameo.onclick = () => open(0);
 
   return {
     open,
     turn,
-    requestClose: () => closeButton.click(),
-    close: dialog.close,
-    trapTab: dialog.trapTab,
+    dismiss: () => {
+      if (!dialog.isOpen) return;
+      travelOnClose = false;
+      dialog.close();
+    },
     get isOpen() {
       return dialog.isOpen;
     }

@@ -1,4 +1,5 @@
 import { CHAPTERS, CHAPTER_COUNT } from '../../data/chapters';
+import { prefersReducedMotion } from '../../lib/motion';
 import { state } from '../state';
 import { byId } from './dom';
 
@@ -20,7 +21,8 @@ export const createNavigation = ({ onChapterChange }: { onChapterChange: (index:
   const label = byId('chapter-label');
   const hint = byId('scroll-hint');
 
-  const goTo = (index: number) => scroller.scrollTo({ top: index * scroller.clientHeight, behavior: 'smooth' });
+  const goTo = (index: number) =>
+    scroller.scrollTo({ top: index * scroller.clientHeight, behavior: prefersReducedMotion() ? 'instant' : 'smooth' });
 
   const setActive = (index: number) => {
     if (index === state.activeChapter) return;
