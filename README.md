@@ -2,7 +2,7 @@
 
 Personal portfolio of **Lorenzo Tripodi** — a gold-on-navy star map in Three.js. Every section draws a constellation; each star holds a note, and "Open the chart" shows the full details.
 
-Built with [Astro](https://astro.build) (static output) and strict TypeScript, [Tailwind CSS v4](https://tailwindcss.com) and [Three.js](https://threejs.org). Deployed for free on GitHub Pages.
+Built with [Astro](https://astro.build) (static output), strict TypeScript, plain CSS and [Three.js](https://threejs.org). Deployed for free on GitHub Pages.
 
 ## Run locally
 
