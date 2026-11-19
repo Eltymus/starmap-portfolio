@@ -1,0 +1,11 @@
+---
+import CloseButton from './CloseButton.astro';
+---
+<div id="chart-sheet" class="overlay" aria-hidden="true">
+  <div class="sheet" role="dialog" aria-label="Chart">
+    <div class="sheet-art"></div>
+    <CloseButton class="sheet-close" label="Close" />
+    <div class="sheet-body"></div>
+    <div class="sheet-footer"><button class="sheet-prev" type="button"></button><span></span><button class="sheet-next" type="button"></button></div>
+  </div>
+</div>

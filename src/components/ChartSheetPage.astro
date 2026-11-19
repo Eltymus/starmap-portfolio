@@ -1,0 +1,32 @@
+---
+import { CHAPTERS } from '../data/chapters.js';
+import { PORTRAIT_URL } from '../lib/assets.js';
+import Link from './Link.astro';
+import Ornament from './Ornament.astro';
+
+interface Props {
+  index: number;
+}
+
+const LIST_NUMERALS = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+
+const { index } = Astro.props;
+const chapter = CHAPTERS[index];
+const sheet = chapter.sheet;
+const kicker = (index ? 'CHART ' + chapter.numeral + ' · ' : '') + chapter.name.toUpperCase();
+---
+<template data-sheet={index}>
+  {sheet.portrait && <figure class="sheet-portrait"><img alt="Portrait of Lorenzo Tripodi" src={PORTRAIT_URL}><figcaption>Laurentius · observed in Turin</figcaption></figure>}
+  <span class="sheet-kicker">{kicker}</span>
+  <h2>{sheet.title}</h2>
+  <p class="sheet-role">{sheet.role}<i>{sheet.when}</i></p>
+  <Ornament />
+  {sheet.observations && <ol class="entries">{sheet.observations.map((text, k) => <li><em>{LIST_NUMERALS[k]}</em>{text}</li>)}</ol>}
+  {sheet.jobs && <ol class="entries">{sheet.jobs.map(([role, period, text], k) => <li><em>{LIST_NUMERALS[k]}</em><b>{role}</b><small>{period}</small>{text}</li>)}</ol>}
+  {sheet.instrumentGroups && <h5>INSTRUMENTS</h5>}
+  {sheet.instrumentGroups && sheet.instrumentGroups.map(([family, tools]) => <p class="instruments"><i>{family}</i>{tools}</p>)}
+  {sheet.instruments && <h5>INSTRUMENTS</h5>}
+  {sheet.instruments && <p class="instruments">{sheet.instruments.join(' · ')}</p>}
+  {sheet.links && <h5>BEARINGS</h5>}
+  {sheet.links && <div class="bearings">{sheet.links.map(([label, href]) => <Link href={href}>{label}</Link>)}</div>}
+</template>

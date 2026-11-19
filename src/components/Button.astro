@@ -1,0 +1,16 @@
+---
+import Link from './Link.astro';
+
+interface Props {
+  href?: string;
+  go?: number;
+  variant?: 'solid' | 'ghost' | 'text';
+}
+
+const { href, go, variant = 'solid' } = Astro.props;
+const VARIANT_CLASSES = { solid: 'btn', ghost: 'btn btn-ghost', text: 'text-button' };
+const className = VARIANT_CLASSES[variant];
+---
+{href
+  ? <Link class={className} href={href}><slot /></Link>
+  : <button class={className} type="button" data-go={go}><slot /></button>}

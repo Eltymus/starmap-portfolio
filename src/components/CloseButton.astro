@@ -1,0 +1,9 @@
+---
+interface Props {
+  class: string;
+  label: string;
+}
+
+const { class: className, label } = Astro.props;
+---
+<button class:list={['close-button', className]} type="button" aria-label={label}>✕</button>

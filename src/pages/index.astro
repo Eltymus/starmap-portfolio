@@ -1,111 +1,91 @@
 ---
 import Base from '../layouts/Base.astro';
+import Button from '../components/Button.astro';
+import ButtonRow from '../components/ButtonRow.astro';
+import Cameo from '../components/Cameo.astro';
+import Chapter from '../components/Chapter.astro';
+import ChartSheetDialog from '../components/ChartSheetDialog.astro';
+import ChartSheetPage from '../components/ChartSheetPage.astro';
+import Chips from '../components/Chips.astro';
+import FullMapDialog from '../components/FullMapDialog.astro';
+import Kicker from '../components/Kicker.astro';
+import Link from '../components/Link.astro';
+import StackList from '../components/StackList.astro';
+import StarMapStage from '../components/StarMapStage.astro';
+import StarTip from '../components/StarTip.astro';
+import Timeline from '../components/Timeline.astro';
+import { CHAPTERS } from '../data/chapters.js';
+
+const EMAIL = 'lorenzo.tripodi98@gmail.com';
 ---
 <Base>
-<div id="scroller">
-  <div id="stage">
-    <canvas id="c" role="img" aria-label="A gold-on-navy star map; each section draws its own constellation"></canvas>
-    <div class="frame"><i>✦</i><i>✦</i><i>✦</i><i>✦</i></div>
-    <header><span class="logo">LORENZO TRIPODI</span><span class="hr"><span id="label">Laurentius</span><button id="mapBtn" class="hbtn" type="button">✦ FULL MAP</button></span></header>
-    <div id="coords">RA 00h 00m · DEC +00°</div>
-    <nav id="moons" aria-label="Constellations"><div id="track"><i id="fill"></i></div></nav>
-    <div id="hint">SCROLL TO CHART</div>
-    <div id="intro">
-      <svg viewBox="0 0 150 150" aria-hidden="true"><circle cx="75" cy="75" r="70"></circle><circle class="d2" cx="75" cy="75" r="60"></circle><path class="d3" d="M75 8 L82 68 L142 75 L82 82 L75 142 L68 82 L8 75 L68 68 Z"></path><path class="d3" d="M75 40 L79 71 L110 75 L79 79 L75 110 L71 79 L40 75 L71 71 Z"></path></svg>
-      <p>CHARTING THE SKY</p>
+  <div id="scroller">
+    <StarMapStage />
+    <StarTip />
+    <FullMapDialog />
+    <ChartSheetDialog />
+
+    <div id="sections">
+      <Chapter index={0} variant="free">
+        <Cameo />
+        <Kicker>A star map of</Kicker>
+        <h1>Lorenzo Tripodi</h1>
+        <span class="lead">Software developer from Turin. Every project I’ve built is a constellation — scroll and I’ll draw them for you.</span>
+        <ButtonRow><Button go={1}>BEGIN THE CHART</Button></ButtonRow>
+      </Chapter>
+
+      <Chapter index={1} title="About me">
+        <p>I ship complete products — from UI and APIs to databases, deployment and the automations that keep them running. I treat AI as a force multiplier while keeping code clean, secure and reviewed.</p>
+        <Chips items={['Turin, Italy', 'Italian · English · Spanish', 'Remote / Hybrid']} />
+      </Chapter>
+
+      <Chapter index={2} title="The stack">
+        <StackList groups={[
+          ['AI & AUTOMATION', 'n8n, LLM agents, prompt engineering, Claude'],
+          ['FRONT END', 'Vue 3, Nuxt 4, React, Next.js, Remix, Tailwind'],
+          ['BACK END', 'Node.js, Express, Nitro, Supabase, PostgreSQL, MongoDB'],
+          ['DEVOPS', 'Docker, GitHub Actions, Vercel, Hetzner, Cloudflare']
+        ]} />
+      </Chapter>
+
+      <Chapter index={3} title="Siply" note="2026 —">
+        <p>An early-stage startup where I own the product end-to-end: headless storefronts on Shopify Hydrogen &amp; Remix, custom Odoo ERP connectors, UI/UX and marketing assets — plus AI agents that took over catalog and content work.</p>
+        <Link href="https://siply.it">siply.it →</Link>
+      </Chapter>
+
+      <Chapter index={4} title="Book Relay">
+        <p>A book-exchange &amp; social platform where I’m CTO and lead developer: architecture, backend, front end and deployment. Node.js/Express on Supabase, with Google Books, Open Library and ISBNdb behind a caching layer.</p>
+        <Link href="https://bookrelay.it">bookrelay.it →</Link>
+      </Chapter>
+
+      <Chapter index={5} title="TavernVTT">
+        <p>A self-hosted D&amp;D 5e virtual tabletop: Nuxt 4 and SQLite on a rules-as-data engine, separate DM and player UIs, Docker behind Cloudflare Tunnel with Litestream backups.</p>
+      </Chapter>
+
+      <Chapter index={6} title="The climb">
+        <Timeline rows={[
+          ['Siply — Developer & Product Designer', '2026 —'],
+          ['ISLM — ODV Portal', 'Jul–Sep 2025'],
+          ['Promemoria Group — Developer', 'Jan–Jul 2025'],
+          ['Independent web projects', '2023 —']
+        ]} />
+      </Chapter>
+
+      <Chapter index={7} variant="free">
+        <Kicker index={7} note="Available January 2027" />
+        <h2 class="display">Send word, and let’s chart the next one.</h2>
+        <ButtonRow>
+          <Button href={'mailto:' + EMAIL}>EMAIL ME</Button>
+          <Button href="https://linkedin.com/in/lorenzo-tripodi-1173aa1b3" variant="ghost">LINKEDIN</Button>
+          <Button href="https://github.com/Eltymus" variant="ghost">GITHUB</Button>
+        </ButtonRow>
+        <span class="fine-print">{EMAIL}</span>
+        <Button go={0} variant="text">↑ Back to the first star</Button>
+      </Chapter>
     </div>
   </div>
 
-  <div id="tip" role="status"><b></b><span></span><em class="tgo">click to open the chart ✦</em></div>
-  <div id="full" aria-hidden="true"><button class="fmx" type="button" aria-label="Close the full map">✕</button><div class="fm" role="dialog" aria-label="The complete chart"><div class="fmw"><svg id="fmsvg" viewBox="-112 -112 224 224"></svg></div><p class="fmh">Choose a constellation to travel there</p></div></div>
-  <div id="plate" aria-hidden="true"><div class="pg" role="dialog" aria-label="Chart"><div class="pgbg"></div><button class="pgx cl" type="button" aria-label="Close">✕</button><div class="pgs"></div><div class="pgf"><button class="pv" type="button"></button><span></span><button class="nx" type="button"></button></div></div></div>
-
-  <div id="sections">
-    <section class="sec on">
-      <div class="panel free">
-        <figure class="cameo" role="button" tabindex="0" aria-label="Open the chart of Laurentius"><span class="ov"><img alt="Portrait of Lorenzo Tripodi" id="cameoImg"></span><figcaption><b>PORTRAIT</b>Lorenzo · Turin</figcaption></figure>
-        <span class="kicker">A star map of</span>
-        <h1>Lorenzo Tripodi</h1>
-        <span class="it">Software developer from Turin. Every project I’ve built is a constellation — scroll and I’ll draw them for you.</span>
-        <div class="btns"><button class="btn" data-go="1">BEGIN THE CHART</button></div>
-      </div>
-    </section>
-    <section class="sec">
-      <div class="panel card">
-        <span class="kicker">I · Mole Taurinensis</span>
-        <span class="orn">✦</span>
-        <h2>About me</h2>
-        <p>I ship complete products — from UI and APIs to databases, deployment and the automations that keep them running. I treat AI as a force multiplier while keeping code clean, secure and reviewed.</p>
-        <div class="chips"><span>Turin, Italy</span><span>Italian · English · Spanish</span><span>Remote / Hybrid</span></div>
-      </div>
-    </section>
-    <section class="sec r">
-      <div class="panel card">
-        <span class="kicker">II · Acervus Codicis</span>
-        <span class="orn">✦</span>
-        <h2>The stack</h2>
-        <div class="stack">
-          <span><b>AI &amp; AUTOMATION</b>n8n, LLM agents, prompt engineering, Claude</span>
-          <span><b>FRONT END</b>Vue 3, Nuxt 4, React, Next.js, Remix, Tailwind</span>
-          <span><b>BACK END</b>Node.js, Express, Nitro, Supabase, PostgreSQL, MongoDB</span>
-          <span><b>DEVOPS</b>Docker, GitHub Actions, Vercel, Hetzner, Cloudflare</span>
-        </div>
-      </div>
-    </section>
-    <section class="sec">
-      <div class="panel card">
-        <span class="kicker">III · Racemus · 2026 —</span>
-        <span class="orn">✦</span>
-        <h2>Siply</h2>
-        <p>An early-stage startup where I own the product end-to-end: headless storefronts on Shopify Hydrogen &amp; Remix, custom Odoo ERP connectors, UI/UX and marketing assets — plus AI agents that took over catalog and content work.</p>
-        <a href="https://siply.it" target="_blank" rel="noopener">siply.it →</a>
-      </div>
-    </section>
-    <section class="sec r">
-      <div class="panel card">
-        <span class="kicker">IV · Liber Apertus</span>
-        <span class="orn">✦</span>
-        <h2>Book Relay</h2>
-        <p>A book-exchange &amp; social platform where I’m CTO and lead developer: architecture, backend, front end and deployment. Node.js/Express on Supabase, with Google Books, Open Library and ISBNdb behind a caching layer.</p>
-        <a href="https://bookrelay.it" target="_blank" rel="noopener">bookrelay.it →</a>
-      </div>
-    </section>
-    <section class="sec">
-      <div class="panel card">
-        <span class="kicker">V · Alea Viginti</span>
-        <span class="orn">✦</span>
-        <h2>TavernVTT</h2>
-        <p>A self-hosted D&amp;D 5e virtual tabletop: Nuxt 4 and SQLite on a rules-as-data engine, separate DM and player UIs, Docker behind Cloudflare Tunnel with Litestream backups.</p>
-      </div>
-    </section>
-    <section class="sec r">
-      <div class="panel card">
-        <span class="kicker">VI · Scala Laboris</span>
-        <span class="orn">✦</span>
-        <h2>The climb</h2>
-        <div class="rows">
-          <div class="row"><span>Siply — Developer &amp; Product Designer</span><span>2026 —</span></div>
-          <div class="row"><span>ISLM — ODV Portal</span><span>Jul–Sep 2025</span></div>
-          <div class="row"><span>Promemoria Group — Developer</span><span>Jan–Jul 2025</span></div>
-          <div class="row"><span>Independent web projects</span><span>2023 —</span></div>
-        </div>
-      </div>
-    </section>
-    <section class="sec">
-      <div class="panel free">
-        <span class="kicker">VII · Avis Chartacea · Available January 2027</span>
-        <h2 class="big">Send word, and let’s chart the next one.</h2>
-        <div class="btns">
-          <a class="btn" href="mailto:lorenzo.tripodi98@gmail.com">EMAIL ME</a>
-          <a class="btn w" href="https://linkedin.com/in/lorenzo-tripodi-1173aa1b3" target="_blank" rel="noopener">LINKEDIN</a>
-          <a class="btn w" href="https://github.com/Eltymus" target="_blank" rel="noopener">GITHUB</a>
-        </div>
-        <span class="small">lorenzo.tripodi98@gmail.com</span>
-        <button class="link" data-go="0">↑ Back to the first star</button>
-      </div>
-    </section>
-  </div>
-</div>
+  {CHAPTERS.map((_, i) => <ChartSheetPage index={i} />)}
 
   <script>
     import { startStarMap } from '../scripts/starmap.js';

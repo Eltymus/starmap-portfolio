@@ -1,0 +1,30 @@
+#scroller{height:100vh;height:100dvh;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;scrollbar-width:none;position:relative}
+#scroller::-webkit-scrollbar{display:none}
+#stage{position:sticky;top:0;height:100vh;height:100dvh;width:100%;z-index:0}
+#sky-canvas{width:100%;height:100%;display:block}
+
+.frame{position:absolute;inset:14px;border:1px solid var(--line-faint);pointer-events:none}
+.frame::before{content:"";position:absolute;inset:5px;border:1px solid rgb(var(--gold-rgb) / .08)}
+.frame i{position:absolute;color:var(--gold);font-size:13px;line-height:1}
+.frame i:nth-child(1){top:-7px;left:-5px}
+.frame i:nth-child(2){top:-7px;right:-5px}
+.frame i:nth-child(3){bottom:-7px;left:-5px}
+.frame i:nth-child(4){bottom:-7px;right:-5px}
+
+header{position:absolute;top:0;left:0;right:0;padding:30px calc(44px + var(--gutter));display:flex;justify-content:space-between;align-items:center;gap:16px;pointer-events:none}
+.logo{font-family:var(--font-caps);font-weight:600;font-size:15px;letter-spacing:.28em;color:var(--gold)}
+.header-meta{display:flex;align-items:center;gap:22px}
+#chapter-label{font-family:var(--font-classic);font-style:italic;font-size:20px;color:var(--ink);transition:opacity .5s}
+#full-map-button{pointer-events:auto;min-height:40px;padding:8px 16px;border:1px solid var(--line);background:rgb(var(--navy-rgb) / .5);color:var(--gold);font:600 11px var(--font-caps);letter-spacing:.24em;cursor:pointer;transition:background .3s,border-color .3s}
+#full-map-button:hover{background:rgb(var(--gold-rgb) / .12);border-color:var(--gold)}
+
+#coords{position:absolute;left:calc(44px + var(--gutter));bottom:34px;font-family:var(--font-caps);font-size:11px;letter-spacing:.2em;color:rgb(var(--gold-rgb) / .75)}
+
+#scroll-hint{position:absolute;left:50%;bottom:30px;transform:translateX(-50%);font-family:var(--font-caps);font-size:11px;letter-spacing:.3em;color:var(--gold);transition:opacity .6s;display:flex;align-items:center;gap:12px}
+#scroll-hint::before,#scroll-hint::after{content:"";width:40px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
+#scroll-hint::after{transform:scaleX(-1)}
+
+@media (max-width:760px){
+  header{padding:24px 26px}
+  #chapter-label,#coords,#scroll-hint{display:none}
+}

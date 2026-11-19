@@ -1,0 +1,17 @@
+#moons{position:absolute;right:calc(30px + var(--gutter));top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2px;padding:8px 0}
+#moon-track{position:absolute;right:13px;top:26px;bottom:26px;width:1px;background:repeating-linear-gradient(to bottom,rgb(var(--gold-rgb) / .45) 0 2px,transparent 2px 7px)}
+#moon-progress{position:absolute;left:-1px;top:0;width:3px;height:0;background:linear-gradient(var(--gold),var(--gold-light));box-shadow:0 0 8px rgb(var(--gold-rgb) / .7);transition:height .35s}
+
+#moons button{position:relative;z-index:1;height:36px;border:0;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:0 0 0 8px;color:var(--gold);font:italic 500 16px var(--font-classic)}
+#moons button span{display:flex;align-items:baseline;gap:8px;opacity:0;transform:translateX(8px);transition:.35s;white-space:nowrap;background:rgb(var(--navy-rgb) / .85);padding:4px 10px;border:1px solid var(--line-faint)}
+#moons button:hover span,#moons button:focus-visible span{opacity:1;transform:none}
+#moons button span b{font:600 10px var(--font-caps);letter-spacing:.2em;color:rgb(var(--gold-rgb) / .7)}
+
+#moons svg{flex:none;width:26px;height:26px;opacity:.5;background:radial-gradient(circle,var(--navy) 58%,transparent 60%);transition:opacity .4s,transform .4s,filter .4s}
+#moons button.is-active svg{opacity:1;transform:scale(1.25);filter:drop-shadow(0 0 6px rgb(var(--gold-rgb) / .8))}
+#moons .moon-orbit{opacity:0;transform-box:fill-box;transform-origin:center}
+#moons button.is-active .moon-orbit{opacity:1;animation:spin 14s linear infinite}
+
+@media (max-width:760px){
+  #moons{display:none}
+}

@@ -1,0 +1,20 @@
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{background:radial-gradient(120% 100% at 50% 35%,#16245A 0%,#0B1438 45%,#050A1E 100%);color:var(--ink);font-family:var(--font-body)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;opacity:.07;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");mix-blend-mode:overlay}
+
+h1,h2{margin:0;font-family:var(--font-classic);font-weight:600;letter-spacing:-.01em;background:linear-gradient(100deg,#F8E7BA 0%,#D9A84E 30%,#F6DC9C 50%,#B98A35 70%,#F8E7BA 100%);background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 7s linear infinite}
+h1{font-size:clamp(56px,7vw,104px);line-height:.9;animation-duration:14s}
+h2{font-size:46px;line-height:1}
+p{margin:0;font-size:15.5px;line-height:1.7;color:var(--muted)}
+a{color:var(--gold);font-weight:500}
+
+@keyframes shimmer{to{background-position:-220% 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media (max-width:760px){
+  h2{font-size:36px}
+}
+@media (prefers-reduced-motion:reduce){
+  h1,h2{animation:none}
+}

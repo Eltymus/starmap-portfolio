@@ -1,0 +1,13 @@
+---
+import { CHAPTERS } from '../data/chapters.js';
+
+interface Props {
+  index?: number;
+  note?: string;
+}
+
+const { index, note } = Astro.props;
+const chapter = index === undefined ? null : CHAPTERS[index];
+const text = chapter ? [chapter.numeral, chapter.name, note].filter(Boolean).join(' · ') : null;
+---
+<span class="kicker">{chapter ? text : <slot />}</span>
