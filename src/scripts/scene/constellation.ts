@@ -3,7 +3,7 @@ import { additiveMaterial } from './materials';
 import { random, clamp } from '../../lib/math';
 import { HEX } from '../../lib/theme';
 import type { Chapter, Figure } from '../../data/types';
-import { createStarGeometry, createStarMaterial, STAR_TYPE } from './star-points';
+import { createStarGeometry, createStarMaterial, dynamicAttribute, STAR_TYPE } from './star-points';
 import { createStripeTexture, createRingTexture } from './textures';
 import { buildPenTrails } from './trails';
 
@@ -160,7 +160,8 @@ export class Constellation {
       positions,
       colors,
       this.sizes,
-      new Float32Array(count).fill(STAR_TYPE.cross)
+      new Float32Array(count).fill(STAR_TYPE.cross),
+      { dynamic: true }
     );
     this.starMaterial = createStarMaterial({ twinkle: 0.25, maxSize: 44, flare: 0.7, alpha: 0.6 });
     this.group.add(new THREE.Points(this.starGeometry, this.starMaterial));
@@ -200,7 +201,7 @@ export class Constellation {
 
     this.linePositions = new Float32Array(this.segments.length * 6);
     this.lineGeometry = new THREE.BufferGeometry();
-    this.lineGeometry.setAttribute('position', new THREE.BufferAttribute(this.linePositions, 3));
+    this.lineGeometry.setAttribute('position', dynamicAttribute(this.linePositions, 3));
     this.lineMaterial = new THREE.LineBasicMaterial({
       color: HEX.strokeWhite,
       transparent: true,
@@ -243,7 +244,8 @@ export class Constellation {
         this.penPositions,
         new Float32Array(count * 3).map((_, k) => [1, 0.92, 0.75][k % 3]),
         new Float32Array(count).fill(20),
-        new Float32Array(count).fill(STAR_TYPE.cross)
+        new Float32Array(count).fill(STAR_TYPE.cross),
+        { dynamic: true }
       ),
       createStarMaterial({ twinkle: 0, maxSize: 64, flare: 1.4, alpha: 0 })
     );
@@ -258,7 +260,8 @@ export class Constellation {
         this.dustPositions,
         new Float32Array(DUST_COUNT * 3).map((_, k) => (k % 3 === 2 ? 0.6 : 1)),
         this.dustSizes,
-        new Float32Array(DUST_COUNT).fill(STAR_TYPE.glint)
+        new Float32Array(DUST_COUNT).fill(STAR_TYPE.glint),
+        { dynamic: true }
       ),
       createStarMaterial({ twinkle: 0.5, maxSize: 14, flare: 0.8 })
     );

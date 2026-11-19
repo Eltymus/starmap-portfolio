@@ -1,5 +1,3 @@
-import * as THREE from 'three';
-import { startSkyScene } from './scene/sky-scene';
 import { state, trackPointer } from './state';
 import { type ChartSheet, createChartSheet } from './ui/chart-sheet';
 import { byId } from './ui/dom';
@@ -26,22 +24,23 @@ export function startStarMap(): void {
   bindKeyboard({ navigation, sheet: chartSheet, fullMap });
 
   const intro = byId('intro');
-  if (!THREE || !THREE.WebGLRenderer) {
-    intro.classList.add('is-done');
-    return;
-  }
 
-  startSkyScene({
-    canvas: byId<HTMLCanvasElement>('sky-canvas'),
-    coordsElement: byId('coords'),
-    onHover: (hover) => {
-      state.hoveredNote = hover;
-      showStarTip(hover);
-    },
-    onStart: () => setTimeout(() => intro.classList.add('is-done'), INTRO_HOLD),
-    // A stable signal for tests and tooling that every engraving is in place.
-    onArtReady: () => document.documentElement.setAttribute('data-art-ready', '')
-  });
+  // Three.js and the scene come in a separate chunk, loaded after the text is on screen.
+  import('./scene/sky-scene')
+    .then(({ startSkyScene }) =>
+      startSkyScene({
+        canvas: byId<HTMLCanvasElement>('sky-canvas'),
+        coordsElement: byId('coords'),
+        onHover: (hover) => {
+          state.hoveredNote = hover;
+          showStarTip(hover);
+        },
+        onStart: () => setTimeout(() => intro.classList.add('is-done'), INTRO_HOLD),
+        // A stable signal for tests and tooling that every engraving is in place.
+        onArtReady: () => document.documentElement.setAttribute('data-art-ready', '')
+      })
+    )
+    .catch(() => intro.classList.add('is-done'));
 
   window.addEventListener('click', (event) => {
     if (!state.hoveredNote || chartSheet.isOpen || (event.target as Element).closest(NOT_A_STAR_CLICK)) return;

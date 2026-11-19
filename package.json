@@ -27,7 +27,7 @@
     "@tailwindcss/vite": "^4.0.0",
     "astro": "^5.0.0",
     "tailwindcss": "^4.0.0",
-    "three": "0.128.0"
+    "three": "^0.187.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
@@ -35,7 +35,7 @@
     "@eslint/js": "^9.39.5",
     "@playwright/test": "^1.65.1",
     "@types/node": "^22.20.5",
-    "@types/three": "^0.128.0",
+    "@types/three": "^0.187.0",
     "astro-eslint-parser": "^1.4.0",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",

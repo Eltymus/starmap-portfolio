@@ -5,7 +5,7 @@ const DURATION = 1100;
 
 export const createShootingStar = (scene: THREE.Scene) => {
   const geometry = new THREE.BufferGeometry();
-  const positions = new THREE.BufferAttribute(new Float32Array(6), 3);
+  const positions = new THREE.BufferAttribute(new Float32Array(6), 3).setUsage(THREE.DynamicDrawUsage);
   geometry.setAttribute('position', positions);
   geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array([0, 0, 0, 1, 0.9, 0.7]), 3));
   const material = new THREE.LineBasicMaterial({

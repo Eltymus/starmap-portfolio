@@ -87,21 +87,30 @@ export const createStarMaterial = ({
   return material;
 };
 
+/** A buffer attribute rewritten every frame: hints the GPU to keep it in fast, writable memory. */
+export const dynamicAttribute = (array: Float32Array, itemSize: number): THREE.BufferAttribute =>
+  new THREE.BufferAttribute(array, itemSize).setUsage(THREE.DynamicDrawUsage);
+
+const staticAttribute = (array: Float32Array, itemSize: number): THREE.BufferAttribute =>
+  new THREE.BufferAttribute(array, itemSize);
+
 export const createStarGeometry = (
   positions: Float32Array,
   colors: Float32Array,
   sizes: Float32Array,
-  types?: Float32Array
+  types?: Float32Array,
+  { dynamic = false }: { dynamic?: boolean } = {}
 ): THREE.BufferGeometry => {
   const count = positions.length / 3;
   const phases = new Float32Array(count);
   for (let i = 0; i < count; i++) phases[i] = random();
   const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  geometry.setAttribute('aColor', new THREE.BufferAttribute(colors, 3));
-  geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
-  geometry.setAttribute('aPhase', new THREE.BufferAttribute(phases, 1));
-  geometry.setAttribute('aType', new THREE.BufferAttribute(types || new Float32Array(count).fill(STAR_TYPE.glint), 1));
+  const changing = dynamic ? dynamicAttribute : staticAttribute;
+  geometry.setAttribute('position', changing(positions, 3));
+  geometry.setAttribute('aColor', staticAttribute(colors, 3));
+  geometry.setAttribute('aSize', changing(sizes, 1));
+  geometry.setAttribute('aPhase', staticAttribute(phases, 1));
+  geometry.setAttribute('aType', staticAttribute(types || new Float32Array(count).fill(STAR_TYPE.glint), 1));
   return geometry;
 };
 

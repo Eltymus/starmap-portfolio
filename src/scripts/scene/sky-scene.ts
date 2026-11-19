@@ -1,3 +1,4 @@
+import { OUTPUT_COLOR_SPACE } from './color-management';
 import * as THREE from 'three';
 import { CHAPTERS, CHAPTER_COUNT, chapterSkyAngles } from '../../data/chapters';
 import { clamp, easeInOutCubic } from '../../lib/math';
@@ -64,6 +65,7 @@ export const startSkyScene = ({ canvas, coordsElement, onHover, onStart, onArtRe
     powerPreference: 'high-performance',
     stencil: false
   });
+  renderer.outputColorSpace = OUTPUT_COLOR_SPACE;
   renderer.setPixelRatio(preferredPixelRatio());
   let width = 1;
   let height = 1;
