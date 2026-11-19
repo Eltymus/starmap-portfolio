@@ -6,6 +6,8 @@ Built with [Astro](https://astro.build) (static output), strict TypeScript, plai
 
 ## Run locally
 
+Requires Node 22 (`.nvmrc`; `nvm use` picks it up), the version CI uses.
+
 ```bash
 npm install
 npm run dev        # http://localhost:4321/starmap-portfolio/

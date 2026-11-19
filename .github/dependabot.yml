@@ -1,0 +1,44 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore(deps)
+      prefix-development: chore(dev-deps)
+    groups:
+      astro:
+        patterns: ['astro', '@astrojs/*']
+      three:
+        patterns: ['three', '@types/three']
+      fonts:
+        patterns: ['@fontsource/*']
+      lint-and-format:
+        patterns:
+          - eslint
+          - eslint-*
+          - '@eslint/*'
+          - typescript-eslint
+          - stylelint
+          - stylelint-*
+          - prettier
+          - prettier-*
+          - globals
+    ignore:
+      # Bumped by hand, together with the container image in .github/workflows/ci.yml and the
+      # Linux screenshot baselines (`npm run test:e2e:linux -- --update-snapshots`): a new browser renders differently.
+      - dependency-name: '@playwright/test'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: ci
+    groups:
+      actions:
+        patterns: ['*']
