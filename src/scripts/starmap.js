@@ -56,10 +56,11 @@ export function startStarMap() {
     const bg = plateBg(i); bgEl.style.backgroundImage = bg ? 'url(' + bg + ')' : 'none';
     const pv = dr.querySelector('.pv'), nx = dr.querySelector('.nx'); pv.disabled = i === 0; nx.disabled = i === NS - 1;
     pv.textContent = i > 0 ? '‹ ' + NAMES[i - 1] : ''; nx.textContent = i < NS - 1 ? NAMES[i + 1] + ' ›' : ''; dr.querySelector('.pgf span').textContent = (i + 1) + ' / ' + NS; };
-  const openDrawer = (i) => { plateI = i; fillPlate(i); dr.classList.add('open'); dr.setAttribute('aria-hidden', 'false'); drawerOpen = true; };
+  let drawerReturn = null;
+  const openDrawer = (i) => { plateI = i; fillPlate(i); drawerReturn = document.activeElement; dr.classList.add('open'); dr.setAttribute('aria-hidden', 'false'); drawerOpen = true; dr.querySelector('.pgx').focus({ preventScroll: true }); };
   { const cm = document.querySelector('.cameo'); if (cm) { cm.onclick = () => openDrawer(0); cm.onkeydown = (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDrawer(0); } }; } }
-  const closeDrawer = () => { dr.classList.remove('open'); dr.setAttribute('aria-hidden', 'true'); drawerOpen = false; };
-  const turn = (dir) => { const n2 = clamp(plateI + dir, 0, NS - 1); if (n2 === plateI) return; plateI = n2; pgEl.classList.add('swap'); setTimeout(() => { fillPlate(n2); pgEl.classList.remove('swap'); }, 260); };
+  const closeDrawer = () => { dr.classList.remove('open'); dr.setAttribute('aria-hidden', 'true'); drawerOpen = false; if (dr.contains(document.activeElement) && drawerReturn && drawerReturn.isConnected && drawerReturn !== document.body) drawerReturn.focus({ preventScroll: true }); drawerReturn = null; };
+  const turn = (dir) => { const n2 = clamp(plateI + dir, 0, NS - 1); if (n2 === plateI) return; plateI = n2; pgEl.classList.add('swap'); const onNav = document.activeElement && document.activeElement.closest && document.activeElement.closest('.pgf'); setTimeout(() => { fillPlate(n2); pgEl.classList.remove('swap'); if (onNav && !dr.contains(document.activeElement) || (document.activeElement && document.activeElement.disabled)) (dr.querySelector('.pgf button:not([disabled])') || dr.querySelector('.pgx')).focus({ preventScroll: true }); }, 260); };
   dr.querySelector('.cl').onclick = () => { const i = plateI; closeDrawer(); if (i !== active) setTimeout(() => go(i), 300); };
   dr.querySelector('.pv').onclick = () => turn(-1); dr.querySelector('.nx').onclick = () => turn(1);
   dr.addEventListener('click', (e) => { if (e.target === dr) dr.querySelector('.cl').click(); });
@@ -69,7 +70,7 @@ export function startStarMap() {
 
   // the complete chart: every constellation on one planisphere
   const fullEl = document.getElementById('full'), fsv = document.getElementById('fmsvg');
-  let fullOpen = false, fullBuilt = false, fullArt = false;
+  let fullOpen = false, fullBuilt = false, fullArt = false, fullReturn = null;
   const buildFull = () => { fullBuilt = true; fullArt = artCanvases.filter(Boolean).length === NS; let h = '<defs><radialGradient id="fmbg" cx="50%" cy="45%" r="55%"><stop offset="0" stop-color="#17265F"/><stop offset="1" stop-color="#08102C"/></radialGradient><radialGradient id="fmmw" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#F6DFA6" stop-opacity=".16"/><stop offset="1" stop-color="#F6DFA6" stop-opacity="0"/></radialGradient></defs>';
     h += '<circle r="96" fill="url(#fmbg)"/><ellipse rx="110" ry="20" fill="url(#fmmw)" transform="rotate(-28)"/>';
     let sd = 7; const R = () => (sd = (sd * 9301 + 49297) % 233280) / 233280;
@@ -90,14 +91,9 @@ export function startStarMap() {
       h += '<text y="' + (i === 5 ? 19.5 : 18.5) + '">' + NAMES[i].toUpperCase() + '</text><text class="sb" y="' + (i === 5 ? 22.6 : 21.6) + '">' + SUBS[i] + '</text><text class="hr2" y="-16.8">you are here</text></g>'; });
     fsv.innerHTML = h;
     fsv.querySelectorAll('.cg').forEach(g => { const i = +g.dataset.i; const goTo = () => { closeFull(); setTimeout(() => go(i), 350); }; g.addEventListener('click', goTo); g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); goTo(); } }); }); };
-  const openFull = () => { if (!fullBuilt || !fullArt) buildFull(); fsv.querySelectorAll('.cg').forEach(g => g.classList.toggle('here', +g.dataset.i === active)); fullEl.classList.add('open'); fullEl.setAttribute('aria-hidden', 'false'); fullOpen = true; };
-  const closeFull = () => { fullEl.classList.remove('open'); fullEl.setAttribute('aria-hidden', 'true'); fullOpen = false; };
+  const openFull = () => { if (!fullBuilt || !fullArt) buildFull(); fsv.querySelectorAll('.cg').forEach(g => g.classList.toggle('here', +g.dataset.i === active)); fullReturn = document.activeElement; fullEl.classList.add('open'); fullEl.setAttribute('aria-hidden', 'false'); fullOpen = true; fullEl.querySelector('.fmx').focus({ preventScroll: true }); };
+  const closeFull = () => { if (!fullOpen) return; fullEl.classList.remove('open'); fullEl.setAttribute('aria-hidden', 'true'); fullOpen = false; if (fullEl.contains(document.activeElement) && fullReturn && fullReturn.isConnected && fullReturn !== document.body) fullReturn.focus({ preventScroll: true }); fullReturn = null; };
   document.getElementById('mapBtn').onclick = openFull; fullEl.querySelector('.fmx').onclick = closeFull; fullEl.addEventListener('click', (e) => { if (e.target === fullEl || e.target.classList.contains('fm')) closeFull(); });
-  const ixEl = document.getElementById('index'), ixg = document.getElementById('ixg');
-  NAMES.forEach((n, i) => { const c = document.createElement('button'); c.className = 'ixc'; c.style.transitionDelay = (0.08 + i * 0.06) + 's'; c.innerHTML = miniSVG(i, 0.35 + i * 0.08) + '<span class="num">' + (i ? 'CHART ' + ROMAN[i] : 'FRONTISPIECE') + '</span><span class="nm">' + n + '</span><span class="sb">' + SUBS[i] + '</span>'; c.onclick = () => { closeIx(); setTimeout(() => go(i), 250); }; ixg.appendChild(c); });
-  const openIx = () => { [...ixg.children].forEach((c, i) => c.classList.toggle('cur', i === active)); ixEl.classList.add('open'); ixEl.setAttribute('aria-hidden', 'false'); };
-  const closeIx = () => { ixEl.classList.remove('open'); ixEl.setAttribute('aria-hidden', 'true'); };
-  const ixB = document.getElementById('ixBtn'); if (ixB) ixB.onclick = openIx; document.getElementById('ixClose').onclick = closeIx; ixEl.addEventListener('click', (e) => { if (e.target === ixEl) closeIx(); });
   const moons = [...moonsEl.querySelectorAll('button')];
   document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(+b.dataset.go)));
   let prog = 0, active = -1;
@@ -106,10 +102,13 @@ export function startStarMap() {
   const fillEl = document.getElementById('fill');
   scroller.addEventListener('scroll', () => { prog = scroller.scrollTop / Math.max(1, scroller.clientHeight); setActive(Math.round(prog)); fillEl.style.height = (prog / (NS - 1) * 100) + '%'; }, { passive: true });
   setActive(0);
+  const tabbables = (root) => [...root.querySelectorAll('button:not([disabled]), a[href], [tabindex="0"]')].filter(el => el.getClientRects().length && getComputedStyle(el).visibility !== 'hidden');
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { closeIx(); closeFull(); if (drawerOpen) dr.querySelector('.cl').click(); return; }
+    if (e.key === 'Tab' && (drawerOpen || fullOpen)) { const root = drawerOpen ? dr : fullEl, f = tabbables(root); if (!f.length) return; const first = f[0], last = f[f.length - 1], a = document.activeElement;
+      if (!root.contains(a)) { e.preventDefault(); (e.shiftKey ? last : first).focus(); } else if (e.shiftKey && a === first) { e.preventDefault(); last.focus(); } else if (!e.shiftKey && a === last) { e.preventDefault(); first.focus(); } return; }
+    if (e.key === 'Escape') { closeFull(); if (drawerOpen) dr.querySelector('.cl').click(); return; }
     if (drawerOpen) { if (e.key === 'ArrowRight') turn(1); if (e.key === 'ArrowLeft') turn(-1); return; }
-    if (ixEl.classList.contains('open') || fullOpen) return;
+    if (fullOpen) return;
     if (['ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(Math.min(NS - 1, active + 1)); }
     if (['ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); go(Math.max(0, active - 1)); }
   });
@@ -421,7 +420,7 @@ export function startStarMap() {
   cam.quaternion.setFromRotationMatrix(m4.lookAt(ORIGIN, DIR[0], new T.Vector3(0, 1, 0)));
   let shCur = 0.28, last = 0, started = false, coordT = 0;
   let curHov = null, fAvg = 16, fChk = 0;
-  window.addEventListener('click', (e) => { if (!curHov || drawerOpen || e.target.closest('button, a, .panel, header, #moons, #plate, #full, #index, .cameo')) return; openDrawer(active); });
+  window.addEventListener('click', (e) => { if (!curHov || drawerOpen || e.target.closest('button, a, .panel, header, #moons, #plate, #full, .cameo')) return; openDrawer(active); });
   const loop = (time) => {
     const dt = Math.min(50, time - (last || time)); last = time;
     mats.forEach(m => { m.uniforms.uTime.value = time; });
