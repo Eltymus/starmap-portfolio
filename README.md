@@ -24,6 +24,7 @@ npm run preview
 | `npm run test:e2e`       | End-to-end tests (Playwright) against the built site: navigation, dialogs, keyboard, screenshots |
 | `npm run test:e2e:linux` | The same suite inside the Linux container used by CI (needs Docker)                              |
 | `npm run verify`         | Everything above, in the order CI runs it                                                        |
+| `npm run og-image`       | Redraws `public/og-image.jpg`, the 1200×630 share image, from the built site (run after a build) |
 
 Screenshot baselines live in `tests/e2e/__screenshots__/`, one set per platform. CI compares against the Linux set; after an intentional visual change, refresh it with `npm run build && npm run test:e2e:linux -- --update-snapshots` (and `npm run test:e2e:update` for the local set).
 
@@ -42,7 +43,8 @@ Screenshot baselines live in `tests/e2e/__screenshots__/`, one set per platform.
 | `src/data/types.ts`      | Types of the content (`Chapter`, `Sheet`, `Figure`): a misspelt or missing field fails the build                                  |
 | `src/pages/index.astro`  | The page: the text of every section, composed from components                                                                     |
 | `src/components/`        | Reusable Astro pieces: `Chapter` (section + card), `Button`, `Link`, `Chips`, `StackList`, `Timeline`, dialogs, moon nav, header… |
-| `src/layouts/Base.astro` | `<head>`, fonts (self-hosted via Fontsource)                                                                                      |
+| `src/layouts/Base.astro` | `<head>`: fonts (self-hosted via Fontsource), canonical URL, Open Graph / Twitter cards, JSON-LD `Person`                         |
+| `src/pages/404.astro`    | The "uncharted sky" page GitHub Pages serves for any missing address                                                              |
 | `src/lib/`               | Shared helpers: asset URLs, math, colour palette and canvas fonts                                                                 |
 | `src/scripts/starmap.ts` | Entry point that wires the UI and the 3D scene together                                                                           |
 | `src/scripts/ui/`        | Navigation, chart sheet, full map, star tooltip, keyboard, shared dialog behaviour                                                |
@@ -57,6 +59,14 @@ Screenshot baselines live in `tests/e2e/__screenshots__/`, one set per platform.
 - **Change a section's text**: `src/pages/index.astro`.
 - **Change a chart sheet, star notes or a constellation**: the chapter's object in `src/data/chapters.ts`.
 - **Change a chapter's engraving**: the function with the chapter `id` in `src/scripts/art/engravings.ts` and `decorations.ts`.
+
+## Search and sharing
+
+- Every page has a canonical URL, Open Graph and Twitter card tags; the share image is `public/og-image.jpg`.
+- The home page describes the author as a schema.org `Person` (name, role, city, GitHub and LinkedIn from `src/data/chapters.ts`).
+- `@astrojs/sitemap` writes `sitemap-index.xml` at build time; `public/robots.txt` points to it. On a project site
+  (`<user>.github.io/<repo>/`) crawlers only read the `robots.txt` at the domain root, so the sitemap is also linked from
+  `<head>` and can be submitted in Google Search Console.
 
 ## Deploy (GitHub Pages)
 

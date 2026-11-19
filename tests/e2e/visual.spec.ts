@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { goToChapter, hideSky, openStarMap } from './fixtures';
+import { goToChapter, hideSky, MISSING_PAGE, openStarMap } from './fixtures';
 
 const CHAPTERS = [0, 1, 2, 3, 4, 5, 6, 7];
 
@@ -35,4 +35,10 @@ test.describe('visual regression', () => {
     await page.waitForTimeout(2000);
     await expect(page).toHaveScreenshot('full-map.png');
   });
+});
+
+test('visual regression › 404 page', async ({ page }) => {
+  await page.goto(MISSING_PAGE);
+  await page.evaluate(() => document.fonts.ready);
+  await expect(page).toHaveScreenshot('not-found.png');
 });

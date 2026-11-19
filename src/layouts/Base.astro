@@ -12,11 +12,46 @@ import '../styles/global.css';
 // The two faces the intro and the first chapter are set in: fetched at once instead of after the CSS.
 import cinzel600 from '@fontsource/cinzel/files/cinzel-latin-600-normal.woff2?url';
 import cormorant500Italic from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-italic.woff2?url';
-import { assetUrl } from '../lib/assets';
+import { PERSON } from '../data/person';
+import { assetUrl, PORTRAIT_URL } from '../lib/assets';
 import { COLORS } from '../lib/theme';
 
-const title = 'Lorenzo Tripodi — Star Map';
-const description = 'Portfolio of Lorenzo Tripodi, software developer from Turin: every project is a constellation.';
+interface Props {
+  title?: string;
+  description?: string;
+  /** Keeps the page out of search results (the 404 page). */
+  noindex?: boolean;
+}
+
+const {
+  title = 'Lorenzo Tripodi — Star Map',
+  description = 'Portfolio of Lorenzo Tripodi, software developer from Turin: every project is a constellation.',
+  noindex = false
+} = Astro.props;
+
+const site = Astro.site ?? Astro.url;
+const absolute = (path: string) => new URL(path, site).href;
+const pageUrl = absolute(Astro.url.pathname);
+const homeUrl = absolute(import.meta.env.BASE_URL);
+const image = {
+  url: absolute(assetUrl('og-image.jpg')),
+  alt: 'Lorenzo Tripodi — a gold compass-rose constellation on a navy star chart',
+  width: 1200,
+  height: 630
+};
+
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: PERSON.name,
+  jobTitle: PERSON.jobTitle,
+  url: homeUrl,
+  image: absolute(PORTRAIT_URL),
+  address: { '@type': 'PostalAddress', addressLocality: PERSON.city, addressCountry: PERSON.countryCode },
+  sameAs: PERSON.sameAs
+};
+// `<` escaped so the data can never close the script element.
+const jsonLd = JSON.stringify(person).replace(/</g, '\\u003c');
 ---
 
 <!doctype html>
@@ -28,10 +63,29 @@ const description = 'Portfolio of Lorenzo Tripodi, software developer from Turin
     <link rel="preload" href={cormorant500Italic} as="font" type="font/woff2" crossorigin />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={pageUrl} />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Lorenzo Tripodi — Star Map" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:url" content={pageUrl} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    <meta property="og:image" content={image.url} />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content={String(image.width)} />
+    <meta property="og:image:height" content={String(image.height)} />
+    <meta property="og:image:alt" content={image.alt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image.url} />
+    <meta name="twitter:image:alt" content={image.alt} />
+
     <meta name="theme-color" content={COLORS.navy} />
     <link rel="icon" type="image/svg+xml" href={assetUrl('favicon.svg')} />
+    <link rel="sitemap" href={assetUrl('sitemap-index.xml')} />
+    <script type="application/ld+json" set:html={jsonLd} />
   </head>
   <body>
     <slot />

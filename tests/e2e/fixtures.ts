@@ -26,3 +26,6 @@ export const hideSky = async (page: Page) => {
     window.requestAnimationFrame = () => 0;
   });
 };
+
+/** Any address that is not on the map: the server answers with the 404 page. */
+export const MISSING_PAGE = './no-such-star/';

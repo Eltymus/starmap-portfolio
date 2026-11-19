@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { goToChapter, openStarMap } from './fixtures';
+import { goToChapter, MISSING_PAGE, openStarMap } from './fixtures';
 
 const scan = (page: Page, include?: string) => {
   const builder = new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice']);
@@ -35,6 +35,13 @@ test.describe('axe-core scan', () => {
     const { violations } = await scan(page, '#full-map');
     expect(describeViolations(violations)).toEqual([]);
   });
+});
+
+test('the 404 page has no violations', async ({ page }) => {
+  await page.goto(MISSING_PAGE);
+  await page.evaluate(() => document.fonts.ready);
+  const { violations } = await scan(page);
+  expect(describeViolations(violations)).toEqual([]);
 });
 
 test.describe('reduced motion', () => {

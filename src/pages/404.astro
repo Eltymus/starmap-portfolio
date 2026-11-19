@@ -1,0 +1,80 @@
+---
+import Base from '../layouts/Base.astro';
+import Button from '../components/Button.astro';
+import Frame from '../components/Frame.astro';
+import Kicker from '../components/Kicker.astro';
+import { seededRandom } from '../lib/math';
+import '../styles/not-found.css';
+
+// A static sky, the same on every build: no WebGL on this page.
+const random = seededRandom(404);
+const STAR_COUNT = 150;
+const stars = Array.from({ length: STAR_COUNT }, (_, k) => ({
+  x: (random() * 100).toFixed(2),
+  y: (random() * 100).toFixed(2),
+  r: (0.5 + random() * 1.1).toFixed(2),
+  opacity: (0.2 + random() * 0.6).toFixed(2),
+  twinkle: k % 7 === 0
+}));
+
+// A small constellation whose last star is missing, in the chart's 260 x 170 box.
+const POINTS = [
+  [28, 128],
+  [72, 76],
+  [122, 96],
+  [164, 44],
+  [150, 120]
+] as const;
+const EDGES = [
+  [0, 1],
+  [1, 2],
+  [2, 3],
+  [2, 4]
+] as const;
+const LOST = [222, 70] as const;
+---
+
+<Base
+  title="Uncharted sky — Lorenzo Tripodi"
+  description="This page is not on the star map of Lorenzo Tripodi."
+  noindex
+>
+  <div class="not-found">
+    <svg class="nf-sky" aria-hidden="true">
+      {stars.map((star) => (
+        <circle
+          class:list={['nf-star', { 'nf-twinkle': star.twinkle }]}
+          cx={`${star.x}%`}
+          cy={`${star.y}%`}
+          r={star.r}
+          opacity={star.opacity}
+        />
+      ))}
+    </svg>
+    <Frame />
+
+    <main class="nf-main">
+      <svg class="nf-chart" viewBox="0 0 260 170" aria-hidden="true">
+        {EDGES.map(([a, b]) => (
+          <line x1={POINTS[a][0]} y1={POINTS[a][1]} x2={POINTS[b][0]} y2={POINTS[b][1]} />
+        ))}
+        <line class="nf-lost-line" x1={POINTS[3][0]} y1={POINTS[3][1]} x2={LOST[0] - 15} y2={LOST[1] - 4} />
+        {POINTS.map(([x, y]) => (
+          <g>
+            <circle class="nf-halo" cx={x} cy={y} r="9" />
+            <circle class="nf-point" cx={x} cy={y} r="2.6" />
+          </g>
+        ))}
+        <circle class="nf-lost" cx={LOST[0]} cy={LOST[1]} r="15" />
+        <text class="nf-lost-mark" x={LOST[0]} y={LOST[1]}>
+          ?
+        </text>
+      </svg>
+
+      <Kicker>Error 404 · Terra incognita</Kicker>
+      <h1>Uncharted sky</h1>
+      <p>No star has been charted at this address. It may have drifted, or it was never on the map.</p>
+      <Button href={import.meta.env.BASE_URL}>BACK TO THE STAR MAP</Button>
+    </main>
+  </div>
+</Base>
