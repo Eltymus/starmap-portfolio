@@ -88,6 +88,12 @@ Screenshot baselines live in `tests/e2e/__screenshots__/`, one set per platform.
   set from a meta tag.
 - An end-to-end test uses the whole site (WebGL sky, chart sheet, full map, 404) and fails on any CSP violation.
 
+## Commits and changelog
+
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/): `feat:`, `fix:`,
+`perf:`, `build:`, `ci:`, `chore:`, `docs:`, `test:`, `refactor:`, with an optional scope (`fix(chart-sheet): …`).
+Notable changes go in `CHANGELOG.md` under **Unreleased**. Run `npm run verify` before every commit.
+
 ## Deploy (GitHub Pages)
 
 1. Push to the `main` branch of `github.com/<user>/starmap-portfolio`.
@@ -99,3 +105,12 @@ If the GitHub username or repo name changes, update `site` and `base` in `astro.
 ## Image credits
 
 Engravings are public domain, traced in gold: Mole Antonelliana (image provided by the author), Leonardo da Vinci's icosahedron (Pacioli, _De divina proportione_, 1509), grapes (_The Cultivation of the Native Grape_, 1868), stair (_Stair-Building_), open book (Nodier, _The Bibliomaniac_, 1894), bird with letter (chapbook _History of Birds_, c. 1830); the 90s computer is an Openclipart drawing (public domain).
+
+## License
+
+The source code is released under the [MIT License](LICENSE).
+
+The license does not cover the personal content: the texts about the author (`src/data/chapters.ts`,
+`src/pages/index.astro`), the portrait (`public/img/portrait.webp`) and the share image (`public/og-image.jpg`) remain
+© Lorenzo Tripodi, all rights reserved. The engravings are public domain (see above); the fonts keep their own licenses
+(SIL Open Font License, via Fontsource).
