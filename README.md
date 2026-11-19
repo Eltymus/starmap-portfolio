@@ -26,6 +26,7 @@ npm run preview
 | `npm run test:e2e`       | End-to-end tests (Playwright) against the built site: navigation, dialogs, keyboard, screenshots |
 | `npm run test:e2e:linux` | The same suite inside the Linux container used by CI (needs Docker)                              |
 | `npm run verify`         | Everything above, in the order CI runs it                                                        |
+| `npm run static-sky`     | Redraws `public/img/static-sky.webp`, the flat sky shown when WebGL is unavailable               |
 | `npm run og-image`       | Redraws `public/og-image.jpg`, the 1200×630 share image, from the built site (run after a build) |
 
 Screenshot baselines live in `tests/e2e/__screenshots__/`, one set per platform. CI compares against the Linux set; after an intentional visual change, refresh it with `npm run build && npm run test:e2e:linux -- --update-snapshots` (and `npm run test:e2e:update` for the local set).
@@ -61,6 +62,15 @@ Screenshot baselines live in `tests/e2e/__screenshots__/`, one set per platform.
 - **Change a section's text**: `src/pages/index.astro`.
 - **Change a chart sheet, star notes or a constellation**: the chapter's object in `src/data/chapters.ts`.
 - **Change a chapter's engraving**: the function with the chapter `id` in `src/scripts/art/engravings.ts` and `decorations.ts`.
+
+## Without WebGL
+
+- If the browser has no WebGL, `new WebGLRenderer` throws: the page catches it, shows `public/img/static-sky.webp`
+  instead of the 3D sky, closes the intro and still draws the engravings for the chart sheet and the full map.
+  The same happens if the 3D chunk fails to load.
+- If the GPU drops the WebGL context, the render loop pauses and the static sky covers the canvas until the context is
+  restored; three rebuilds its buffers, textures and shaders and the loop resumes.
+- Both cases are covered by `tests/e2e/webgl.spec.ts`.
 
 ## Search and sharing
 

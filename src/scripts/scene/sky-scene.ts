@@ -4,8 +4,7 @@ import { CHAPTERS, CHAPTER_COUNT, chapterSkyAngles } from '../../data/chapters';
 import { clamp, easeInOutCubic } from '../../lib/math';
 import { prefersReducedMotion } from '../../lib/motion';
 import { formatSkyCoordinates } from '../../lib/sky-coordinates';
-import { drawChapterArt } from '../art/chapter-art';
-import { loadEngravingImages } from '../art/engravings';
+import { drawAllChapterArt, whenArtAssetsReady } from '../art/art-assets';
 import { state } from '../state';
 import { Constellation, type HoveredNote } from './constellation';
 import { createShootingStar } from './shooting-star';
@@ -22,13 +21,15 @@ export interface SkySceneOptions {
   onStart: () => void;
   /** Called once the engravings have been drawn (they also back the chart sheet and the full map). */
   onArtReady?: () => void;
+  /** The GPU dropped the WebGL context (driver reset, too many contexts): the sky stops drawing. */
+  onContextLost?: () => void;
+  /** The context is back and the sky draws again. */
+  onContextRestored?: () => void;
 }
 
 const UP = new THREE.Vector3(0, 1, 0);
 const ORIGIN = new THREE.Vector3();
 const FORWARD = new THREE.Vector3(0, 0, -1);
-const ART_BUILD_TIMEOUT = 2500;
-const ART_FONTS = ['600 40px Cinzel', 'italic 600 40px "Cormorant Garamond"', 'italic 500 40px "Cormorant Garamond"'];
 
 const preferredPixelRatio = () => {
   const device = window.devicePixelRatio || 1;
@@ -57,7 +58,19 @@ const createAdaptiveResolution = (renderer: THREE.WebGLRenderer, getSize: () => 
   };
 };
 
-export const startSkyScene = ({ canvas, coordsElement, onHover, onStart, onArtReady }: SkySceneOptions): void => {
+/**
+ * Starts the 3D sky on the canvas. Throws if WebGL is not available (the renderer cannot get a context):
+ * the caller shows a static sky instead.
+ */
+export const startSkyScene = ({
+  canvas,
+  coordsElement,
+  onHover,
+  onStart,
+  onArtReady,
+  onContextLost,
+  onContextRestored
+}: SkySceneOptions): void => {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: false,
@@ -91,21 +104,16 @@ export const startSkyScene = ({ canvas, coordsElement, onHover, onStart, onArtRe
   });
   const constellations = CHAPTERS.map((chapter, i) => new Constellation(chapter, directions[i], scene));
 
-  let artBuilt = false;
-  const buildArt = () => {
-    if (artBuilt) return;
-    artBuilt = true;
-    constellations.forEach((constellation, i) => {
-      const artTexture = new THREE.CanvasTexture(drawChapterArt(i));
-      constellation.setArt(artTexture, createConstellationLabelTexture(CHAPTERS[i].name, CHAPTERS[i].subtitle));
+  whenArtAssetsReady().then(() => {
+    drawAllChapterArt().forEach((art, i) => {
+      constellations[i].setArt(
+        new THREE.CanvasTexture(art),
+        createConstellationLabelTexture(CHAPTERS[i].name, CHAPTERS[i].subtitle)
+      );
     });
     paintStarNames();
     onArtReady?.();
-  };
-  const imagesReady = loadEngravingImages();
-  if (document.fonts && document.fonts.load)
-    Promise.all([imagesReady, ...ART_FONTS.map((font) => document.fonts.load(font))]).then(buildArt, buildArt);
-  setTimeout(buildArt, ART_BUILD_TIMEOUT);
+  });
 
   addOrnaments();
   const updateShootingStar = createShootingStar(scene);
@@ -120,6 +128,7 @@ export const startSkyScene = ({ canvas, coordsElement, onHover, onStart, onArtRe
   let lastTime = 0;
   let started = false;
   let coordsElapsed = 0;
+  let frameRequest = 0;
 
   const frame = (time: number): void => {
     const dt = Math.min(50, time - (lastTime || time));
@@ -188,7 +197,20 @@ export const startSkyScene = ({ canvas, coordsElement, onHover, onStart, onArtRe
       started = true;
       onStart();
     }
-    requestAnimationFrame(frame);
+    frameRequest = requestAnimationFrame(frame);
   };
-  requestAnimationFrame(frame);
+
+  // three already calls preventDefault() on a lost context, which allows it to be restored, and rebuilds
+  // its GPU state (buffers, textures, shaders) on restore. Here: stop the loop meanwhile, then resume it.
+  canvas.addEventListener('webglcontextlost', () => {
+    cancelAnimationFrame(frameRequest);
+    onContextLost?.();
+  });
+  canvas.addEventListener('webglcontextrestored', () => {
+    lastTime = 0;
+    onContextRestored?.();
+    frameRequest = requestAnimationFrame(frame);
+  });
+
+  frameRequest = requestAnimationFrame(frame);
 };

@@ -1,3 +1,4 @@
+import { drawAllChapterArt, whenArtAssetsReady } from './art/art-assets';
 import { state, trackPointer } from './state';
 import { type ChartSheet, createChartSheet } from './ui/chart-sheet';
 import { byId } from './ui/dom';
@@ -5,6 +6,7 @@ import { createFullMap } from './ui/full-map';
 import { bindKeyboard } from './ui/keyboard';
 import { createNavigation } from './ui/navigation';
 import { createStarTip } from './ui/star-tip';
+import { createStaticSky } from './ui/static-sky';
 
 const INTRO_HOLD = 1600;
 const NOT_A_STAR_CLICK = 'button, a, .panel, header, #moons, #chart-sheet, #full-map, .cameo';
@@ -24,23 +26,40 @@ export function startStarMap(): void {
   bindKeyboard({ navigation, sheet: chartSheet, fullMap });
 
   const intro = byId('intro');
+  const canvas = byId<HTMLCanvasElement>('sky-canvas');
+  const showStaticSky = createStaticSky(canvas);
+  // A stable signal for tests and tooling that every engraving is in place.
+  const markArtReady = () => document.documentElement.setAttribute('data-art-ready', '');
+
+  // No WebGL (or the scene chunk failed to load): a static sky, the intro closes at once,
+  // and the engravings are still drawn for the chart sheet and the full map.
+  const fallBackToStaticSky = (error: unknown) => {
+    console.warn('3D sky unavailable, showing a static one instead.', error);
+    showStaticSky(true);
+    intro.classList.add('is-done');
+    whenArtAssetsReady().then(() => {
+      drawAllChapterArt();
+      markArtReady();
+    });
+  };
 
   // Three.js and the scene come in a separate chunk, loaded after the text is on screen.
   import('./scene/sky-scene')
     .then(({ startSkyScene }) =>
       startSkyScene({
-        canvas: byId<HTMLCanvasElement>('sky-canvas'),
+        canvas,
         coordsElement: byId('coords'),
         onHover: (hover) => {
           state.hoveredNote = hover;
           showStarTip(hover);
         },
         onStart: () => setTimeout(() => intro.classList.add('is-done'), INTRO_HOLD),
-        // A stable signal for tests and tooling that every engraving is in place.
-        onArtReady: () => document.documentElement.setAttribute('data-art-ready', '')
+        onArtReady: markArtReady,
+        onContextLost: () => showStaticSky(true),
+        onContextRestored: () => showStaticSky(false)
       })
     )
-    .catch(() => intro.classList.add('is-done'));
+    .catch(fallBackToStaticSky);
 
   window.addEventListener('click', (event) => {
     if (!state.hoveredNote || chartSheet.isOpen || (event.target as Element).closest(NOT_A_STAR_CLICK)) return;
