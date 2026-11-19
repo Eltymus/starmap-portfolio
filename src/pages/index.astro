@@ -14,7 +14,7 @@ import StackList from '../components/StackList.astro';
 import StarMapStage from '../components/StarMapStage.astro';
 import StarTip from '../components/StarTip.astro';
 import Timeline from '../components/Timeline.astro';
-import { CHAPTERS } from '../data/chapters.js';
+import { CHAPTERS } from '../data/chapters';
 
 const EMAIL = 'lorenzo.tripodi98@gmail.com';
 ---
@@ -119,7 +119,7 @@ const EMAIL = 'lorenzo.tripodi98@gmail.com';
   ))}
 
   <script>
-    import { startStarMap } from '../scripts/starmap.js';
+    import { startStarMap } from '../scripts/starmap';
     startStarMap();
   </script>
 </Base>

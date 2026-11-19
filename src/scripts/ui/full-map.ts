@@ -1,9 +1,11 @@
-import { CHAPTERS, chapterSkyAngles } from '../../data/chapters.js';
-import { seededRandom } from '../../lib/math.js';
-import { COLORS } from '../../lib/theme.js';
-import { chapterArtImageUrl, hasAllChapterArt } from '../art/chapter-art.js';
-import { state } from '../state.js';
-import { createDialog } from './dialog.js';
+import { CHAPTERS, chapterSkyAngles } from '../../data/chapters';
+import { seededRandom } from '../../lib/math';
+import { COLORS } from '../../lib/theme';
+import { chapterArtImageUrl, hasAllChapterArt } from '../art/chapter-art';
+import { state } from '../state';
+import { createDialog } from './dialog';
+import { activateOnEnterOrSpace, byId, query } from './dom';
+import type { Chapter } from '../../data/types';
 
 const NAVIGATE_AFTER_CLOSE = 350;
 const ART_SCALE = 2.0;
@@ -66,7 +68,7 @@ const compassTitle = () =>
   `<text y="17" font-family="Cinzel" font-weight="600" font-size="4.2" letter-spacing=".9" fill="${GOLD}" text-anchor="middle">LORENZO TRIPODI</text>` +
   `<text y="22.5" font-family="Cormorant Garamond" font-style="italic" font-size="3.6" fill="${COLORS.muted}" text-anchor="middle">Mappa caelestis · MMXXVI</text></g>`;
 
-const constellationGroup = (chapter, i) => {
+const constellationGroup = (chapter: Chapter, i: number): string => {
   const { azimuth, elevation } = chapterSkyAngles(i);
   const theta = azimuth - Math.PI / 2;
   const rho = 64 - elevation * 34;
@@ -90,10 +92,17 @@ const constellationGroup = (chapter, i) => {
   );
 };
 
-export const createFullMap = ({ goTo }) => {
-  const root = document.getElementById('full-map');
-  const svg = document.getElementById('full-map-svg');
-  const closeButton = root.querySelector('.full-map-close');
+export interface FullMap {
+  open: () => void;
+  close: () => void;
+  trapTab: (event: KeyboardEvent) => void;
+  readonly isOpen: boolean;
+}
+
+export const createFullMap = ({ goTo }: { goTo: (index: number) => void }): FullMap => {
+  const root = byId('full-map');
+  const svg = byId<HTMLElement>('full-map-svg');
+  const closeButton = query(root, '.full-map-close');
   const dialog = createDialog(root, closeButton);
   let built = false;
   let builtWithArt = false;
@@ -111,18 +120,11 @@ export const createFullMap = ({ goTo }) => {
       hourDial() +
       compassTitle() +
       CHAPTERS.map(constellationGroup).join('');
-    svg.querySelectorAll('.constellation').forEach((group) => {
-      const index = +group.dataset.chapter;
-      const travel = () => {
+    svg.querySelectorAll<SVGGElement>('.constellation').forEach((group) => {
+      const index = Number(group.dataset.chapter);
+      activateOnEnterOrSpace(group, () => {
         close();
         setTimeout(() => goTo(index), NAVIGATE_AFTER_CLOSE);
-      };
-      group.addEventListener('click', travel);
-      group.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          travel();
-        }
       });
     });
   };
@@ -130,15 +132,16 @@ export const createFullMap = ({ goTo }) => {
   const open = () => {
     if (!built || !builtWithArt) build();
     svg
-      .querySelectorAll('.constellation')
-      .forEach((group) => group.classList.toggle('here', +group.dataset.chapter === state.activeChapter));
+      .querySelectorAll<SVGGElement>('.constellation')
+      .forEach((group) => group.classList.toggle('here', Number(group.dataset.chapter) === state.activeChapter));
     dialog.open();
   };
 
-  document.getElementById('full-map-button').onclick = open;
+  byId('full-map-button').onclick = open;
   closeButton.onclick = close;
   root.addEventListener('click', (event) => {
-    if (event.target === root || event.target.classList.contains('full-map-dialog')) close();
+    const target = event.target as Element;
+    if (target === root || target.classList.contains('full-map-dialog')) close();
   });
 
   return {

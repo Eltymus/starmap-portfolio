@@ -1,5 +1,5 @@
 ---
-import { CHAPTERS } from '../data/chapters.js';
+import { CHAPTERS } from '../data/chapters';
 
 interface Props {
   index: number;
@@ -23,7 +23,7 @@ const size = Math.max(x1 - x0, y1 - y0) + PADDING * 2;
 const cx = (x0 + x1) / 2;
 const cy = (y0 + y1) / 2;
 const viewBox = cx - size / 2 + ' ' + (cy - size / 2) + ' ' + size + ' ' + size;
-const delay = (seconds) => 'transition-delay:' + seconds.toFixed(2) + 's';
+const delay = (seconds: number) => 'transition-delay:' + seconds.toFixed(2) + 's';
 ---
 
 <svg class="mini-constellation" viewBox={viewBox} aria-hidden="true">

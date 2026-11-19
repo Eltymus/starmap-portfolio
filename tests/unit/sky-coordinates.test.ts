@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatSkyCoordinates } from '../../src/lib/sky-coordinates.js';
+import { formatSkyCoordinates } from '../../src/lib/sky-coordinates';
 
 const direction = (azimuthHours: number, declinationDegrees: number) => {
   const azimuth = (azimuthHours / 24) * Math.PI * 2;

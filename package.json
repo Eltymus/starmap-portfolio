@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro check && astro build",
     "preview": "astro preview",
     "check": "astro check",
     "lint": "npm run lint:js && npm run lint:css && npm run format:check",
@@ -17,7 +17,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:update": "playwright test --update-snapshots",
-    "verify": "npm run lint && npm run check && npm test && npm run build && npm run test:e2e",
+    "verify": "npm run lint && npm test && npm run build && npm run test:e2e",
     "test:e2e:linux": "node scripts/playwright-linux.mjs"
   },
   "dependencies": {

@@ -1,4 +1,6 @@
-import { CHAPTERS } from '../../data/chapters.js';
+import { CHAPTERS } from '../../data/chapters';
+import type { HoveredNote } from '../scene/constellation';
+import { byId, query } from './dom';
 
 const VISIBLE_CLASS = 'is-visible';
 const OFFSET_X = 26;
@@ -6,13 +8,23 @@ const OFFSET_Y = 22;
 const VIEWPORT_MARGIN = 8;
 const OBSTACLES = '.chapter.is-active .panel, #moons, header .header-meta, header .logo, #coords, #scroll-hint';
 
-const overlaps = (box, rect) =>
+interface Box {
+  l: number;
+  t: number;
+  r: number;
+  b: number;
+}
+
+type Placement = readonly [name: string, left: number, top: number];
+
+const overlaps = (box: Box, rect: DOMRect) =>
   !(box.r <= rect.left || box.l >= rect.right || box.b <= rect.top || box.t >= rect.bottom);
 
-export const createStarTip = () => {
-  const tip = document.getElementById('star-tip');
-  const title = tip.querySelector('b');
-  const text = tip.querySelector('span');
+/** Returns a function that shows the tooltip for a hovered star note, or hides it when given null. */
+export const createStarTip = (): ((hover: HoveredNote | null) => void) => {
+  const tip = byId('star-tip');
+  const title = query(tip, 'b');
+  const text = query(tip, 'span');
   let currentKey = '';
 
   const hide = () => {
@@ -21,13 +33,13 @@ export const createStarTip = () => {
     currentKey = '';
   };
 
-  const choosePlacement = (x, y) => {
+  const choosePlacement = (x: number, y: number): Placement => {
     const width = tip.offsetWidth;
     const height = tip.offsetHeight;
     const obstacles = [...document.querySelectorAll(OBSTACLES)]
       .map((element) => element.getBoundingClientRect())
       .filter((rect) => rect.width);
-    const candidates = [
+    const candidates: Placement[] = [
       ['up-right', x + OFFSET_X, y - OFFSET_Y - height],
       ['up-left', x - OFFSET_X - width, y - OFFSET_Y - height],
       ['down-right', x + OFFSET_X, y + OFFSET_Y],
@@ -36,7 +48,7 @@ export const createStarTip = () => {
     let pick = candidates[0];
     let best = -1;
     candidates.forEach((candidate) => {
-      const box = { l: candidate[1], t: candidate[2], r: candidate[1] + width, b: candidate[2] + height };
+      const box: Box = { l: candidate[1], t: candidate[2], r: candidate[1] + width, b: candidate[2] + height };
       let score = 0;
       if (
         box.l > VIEWPORT_MARGIN &&

@@ -1,12 +1,14 @@
 import * as THREE from 'three';
-import { COLORS, fontCaps, fontClassic } from '../../lib/theme.js';
-import { createCanvas, goldStroke, sparkle, circle } from '../art/canvas.js';
+import { COLORS, fontCaps, fontClassic } from '../../lib/theme';
+import { type Ctx, createCanvas, get2d, goldStroke, sparkle, circle } from '../art/canvas';
+
+export type OrnamentKind = 'saturn' | 'moon' | 'comet' | 'sun';
 
 const HAIR_SPACE = String.fromCharCode(8202);
 
 export const createHazeTexture = () => {
   const canvas = createCanvas(128, 128);
-  const ctx = canvas.getContext('2d');
+  const ctx = get2d(canvas);
   const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
   gradient.addColorStop(0, 'rgba(255,225,170,0.5)');
   gradient.addColorStop(1, 'rgba(0,0,0,0)');
@@ -17,7 +19,7 @@ export const createHazeTexture = () => {
 
 export const createStripeTexture = () => {
   const canvas = createCanvas(8, 64);
-  const ctx = canvas.getContext('2d');
+  const ctx = get2d(canvas);
   const gradient = ctx.createLinearGradient(0, 0, 0, 64);
   gradient.addColorStop(0, 'rgba(255,220,150,0)');
   gradient.addColorStop(0.5, 'rgba(255,226,160,1)');
@@ -29,7 +31,7 @@ export const createStripeTexture = () => {
 
 export const createRingTexture = () => {
   const canvas = createCanvas(128, 128);
-  const ctx = canvas.getContext('2d');
+  const ctx = get2d(canvas);
   ctx.strokeStyle = 'rgba(246,223,166,1)';
   ctx.lineWidth = 3;
   circle(ctx, 64, 64, 58);
@@ -39,9 +41,9 @@ export const createRingTexture = () => {
   return new THREE.CanvasTexture(canvas);
 };
 
-export const createStarNameTexture = (text) => {
+export const createStarNameTexture = (text: string): THREE.CanvasTexture => {
   const canvas = createCanvas(512, 96);
-  const ctx = canvas.getContext('2d');
+  const ctx = get2d(canvas);
   ctx.fillStyle = COLORS.gold;
   ctx.font = fontClassic(52);
   ctx.textBaseline = 'middle';
@@ -49,9 +51,9 @@ export const createStarNameTexture = (text) => {
   return new THREE.CanvasTexture(canvas);
 };
 
-export const createConstellationLabelTexture = (name, subtitle) => {
+export const createConstellationLabelTexture = (name: string, subtitle: string): THREE.CanvasTexture => {
   const canvas = createCanvas(1024, 220);
-  const ctx = canvas.getContext('2d');
+  const ctx = get2d(canvas);
   goldStroke(ctx, 1.5);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -70,7 +72,7 @@ export const createConstellationLabelTexture = (name, subtitle) => {
   return new THREE.CanvasTexture(canvas);
 };
 
-const ORNAMENT_DRAWINGS = {
+const ORNAMENT_DRAWINGS: Record<OrnamentKind, (ctx: Ctx) => void> = {
   saturn: (ctx) => {
     circle(ctx, 256, 256, 90);
     ctx.lineWidth = 1.5;
@@ -128,9 +130,9 @@ const ORNAMENT_DRAWINGS = {
   }
 };
 
-export const createOrnamentTexture = (kind) => {
+export const createOrnamentTexture = (kind: OrnamentKind): THREE.CanvasTexture => {
   const canvas = createCanvas(512, 512);
-  const ctx = canvas.getContext('2d');
+  const ctx = get2d(canvas);
   goldStroke(ctx, 3);
   ORNAMENT_DRAWINGS[kind](ctx);
   return new THREE.CanvasTexture(canvas);

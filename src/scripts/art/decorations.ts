@@ -1,14 +1,30 @@
-import { fontCaps, fontClassic } from '../../lib/theme.js';
-import { ART_CENTER as CENTER, UNIT as U, X, Y, sparkle, circle, dotted, withAlpha, centeredText } from './canvas.js';
+import type { ChapterId } from '../../data/types';
+import { fontCaps, fontClassic } from '../../lib/theme';
+import {
+  type Ctx,
+  ART_CENTER as CENTER,
+  UNIT as U,
+  X,
+  Y,
+  sparkle,
+  circle,
+  dotted,
+  withAlpha,
+  centeredText
+} from './canvas';
 
-const caption = (ctx, text, cx, cy, size, style) => centeredText(ctx, fontClassic(size, style), text, X(cx), Y(cy));
+type Vec2 = readonly [number, number];
+type Link = readonly [number, number];
 
-const drawFineQuill = (ctx, cx, cy, s, rotation) => {
+const caption = (ctx: Ctx, text: string, cx: number, cy: number, size: number, style?: string): void =>
+  centeredText(ctx, fontClassic(size, style), text, X(cx), Y(cy));
+
+const drawFineQuill = (ctx: Ctx, cx: number, cy: number, s: number, rotation: number): void => {
   ctx.save();
   ctx.translate(X(cx), Y(cy));
   ctx.rotate(rotation);
   const length = 3.6 * s * U;
-  const shaft = (t) => [Math.sin(t * Math.PI) * 0.12 * s * U * t, -t * length];
+  const shaft = (t: number): Vec2 => [Math.sin(t * Math.PI) * 0.12 * s * U * t, -t * length];
   ctx.lineWidth = 1.3;
   ctx.beginPath();
   for (let k = 0; k <= 30; k++) {
@@ -17,8 +33,8 @@ const drawFineQuill = (ctx, cx, cy, s, rotation) => {
     else ctx.moveTo(a, b);
   }
   ctx.stroke();
-  const vane = (side, maxWidth) => {
-    const points = [];
+  const vane = (side: number, maxWidth: number): Vec2[] => {
+    const points: Vec2[] = [];
     for (let k = 0; k <= 30; k++) {
       const t = 0.22 + (0.78 * k) / 30;
       const [a, b] = shaft(t);
@@ -83,7 +99,7 @@ const drawFineQuill = (ctx, cx, cy, s, rotation) => {
   ctx.restore();
 };
 
-const drawQuill = (ctx, cx, cy, s, rotation) => {
+const drawQuill = (ctx: Ctx, cx: number, cy: number, s: number, rotation: number): void => {
   ctx.save();
   ctx.translate(X(cx), Y(cy));
   ctx.rotate(rotation);
@@ -108,7 +124,7 @@ const drawQuill = (ctx, cx, cy, s, rotation) => {
   ctx.restore();
 };
 
-const drawDivider = (ctx, cx, cy, s) => {
+const drawDivider = (ctx: Ctx, cx: number, cy: number, s: number): void => {
   ctx.beginPath();
   ctx.moveTo(X(cx), Y(cy + 1.4 * s));
   ctx.lineTo(X(cx - 0.7 * s), Y(cy - 1.1 * s));
@@ -121,7 +137,7 @@ const drawDivider = (ctx, cx, cy, s) => {
   ctx.stroke();
 };
 
-const drawBook = (ctx, cx, cy, w, h, rotation) => {
+const drawBook = (ctx: Ctx, cx: number, cy: number, w: number, h: number, rotation: number): void => {
   ctx.save();
   ctx.translate(X(cx), Y(cy));
   ctx.rotate(rotation || 0);
@@ -133,7 +149,7 @@ const drawBook = (ctx, cx, cy, w, h, rotation) => {
   ctx.restore();
 };
 
-const drawEnvelope = (ctx, cx, cy, w, h, rotation) => {
+const drawEnvelope = (ctx: Ctx, cx: number, cy: number, w: number, h: number, rotation: number): void => {
   ctx.save();
   ctx.translate(X(cx), Y(cy));
   ctx.rotate(rotation || 0);
@@ -146,7 +162,7 @@ const drawEnvelope = (ctx, cx, cy, w, h, rotation) => {
   ctx.restore();
 };
 
-const drawWorkflow = (ctx, points, links) => {
+const drawWorkflow = (ctx: Ctx, points: readonly Vec2[], links: readonly Link[]): void => {
   links.forEach(([a, b]) => {
     ctx.beginPath();
     ctx.moveTo(X(points[a][0]), Y(points[a][1]));
@@ -165,7 +181,7 @@ const drawWorkflow = (ctx, points, links) => {
   });
 };
 
-const ALPINE_RANGES = [
+const ALPINE_RANGES: readonly (readonly Vec2[])[] = [
   [
     [-7.6, 3.5],
     [-6.3, 5.0],
@@ -186,7 +202,7 @@ const ALPINE_RANGES = [
   ]
 ];
 
-const drawMountainRange = (ctx, range) => {
+const drawMountainRange = (ctx: Ctx, range: readonly Vec2[]): void => {
   ctx.beginPath();
   range.forEach((p, k) => (k ? ctx.lineTo(X(p[0]), Y(p[1])) : ctx.moveTo(X(p[0]), Y(p[1]))));
   ctx.stroke();
@@ -212,7 +228,7 @@ const drawMountainRange = (ctx, range) => {
   });
 };
 
-const drawSuperga = (ctx) => {
+const drawSuperga = (ctx: Ctx): void => {
   ctx.beginPath();
   ctx.moveTo(X(4.1), Y(-4.35));
   ctx.quadraticCurveTo(X(5.6), Y(-2.9), X(7.4), Y(-3.6));
@@ -227,7 +243,7 @@ const drawSuperga = (ctx) => {
   ctx.stroke();
 };
 
-const drawRiver = (ctx) => {
+const drawRiver = (ctx: Ctx): void => {
   for (let k = 0; k < 3; k++) {
     ctx.beginPath();
     const yy = -5.1 - k * 0.3;
@@ -237,7 +253,7 @@ const drawRiver = (ctx) => {
   }
 };
 
-const drawBarrel = (ctx) => {
+const drawBarrel = (ctx: Ctx): void => {
   ctx.beginPath();
   ctx.ellipse(X(-6.3), Y(-4.7), 1.1 * U, 0.35 * U, 0, 0, 7);
   ctx.stroke();
@@ -257,7 +273,7 @@ const drawBarrel = (ctx) => {
   });
 };
 
-const drawCorkscrew = (ctx) => {
+const drawCorkscrew = (ctx: Ctx): void => {
   ctx.save();
   ctx.translate(X(6.4), Y(4.6));
   ctx.rotate(0.5);
@@ -275,7 +291,7 @@ const drawCorkscrew = (ctx) => {
   ctx.restore();
 };
 
-const drawBookplate = (ctx) => {
+const drawBookplate = (ctx: Ctx): void => {
   ctx.save();
   ctx.translate(X(-5.9), Y(5.7));
   ctx.strokeRect(-1.25 * U, -0.95 * U, 2.5 * U, 1.9 * U);
@@ -296,7 +312,7 @@ const drawBookplate = (ctx) => {
   ctx.restore();
 };
 
-const drawDie = (ctx) => {
+const drawDie = (ctx: Ctx): void => {
   ctx.save();
   ctx.translate(X(6.3), Y(5.6));
   ctx.rotate(-0.25);
@@ -322,12 +338,12 @@ const drawDie = (ctx) => {
   ctx.restore();
 };
 
-const potionSurface = (ctx) => {
+const potionSurface = (ctx: Ctx): void => {
   ctx.moveTo(-0.8 * U, 0.35 * U);
   ctx.bezierCurveTo(-0.4 * U, 0.15 * U, 0.3 * U, 0.5 * U, 0.8 * U, 0.3 * U);
 };
 
-const drawPotionFlask = (ctx) => {
+const drawPotionFlask = (ctx: Ctx): void => {
   ctx.save();
   ctx.translate(X(-6.3), Y(-5.4));
   ctx.beginPath();
@@ -357,7 +373,7 @@ const drawPotionFlask = (ctx) => {
   ctx.restore();
 };
 
-const drawHeraldicShield = (ctx) => {
+const drawHeraldicShield = (ctx: Ctx): void => {
   ctx.save();
   ctx.translate(X(6.2), Y(-5.4));
   ctx.beginPath();
@@ -391,7 +407,7 @@ const drawHeraldicShield = (ctx) => {
   ctx.restore();
 };
 
-const drawTelescope = (ctx) => {
+const drawTelescope = (ctx: Ctx): void => {
   ctx.save();
   ctx.translate(X(-6.0), Y(-5.0));
   ctx.beginPath();
@@ -425,7 +441,7 @@ const drawTelescope = (ctx) => {
   sparkle(ctx, X(-4.7), Y(-1.3), 12);
 };
 
-const drawLaurelWreath = (ctx) => {
+const drawLaurelWreath = (ctx: Ctx): void => {
   ctx.save();
   ctx.translate(X(6.2), Y(-5.3));
   const radius = 0.95 * U;
@@ -457,7 +473,7 @@ const drawLaurelWreath = (ctx) => {
   ctx.restore();
 };
 
-const drawGlobe = (ctx) => {
+const drawGlobe = (ctx: Ctx): void => {
   circle(ctx, X(6.2), Y(5.6), 1.2 * U);
   ctx.beginPath();
   ctx.ellipse(X(6.2), Y(5.6), 0.5 * U, 1.2 * U, 0, 0, 7);
@@ -469,7 +485,7 @@ const drawGlobe = (ctx) => {
   });
 };
 
-const drawWaxSeal = (ctx) => {
+const drawWaxSeal = (ctx: Ctx): void => {
   circle(ctx, X(5.9), Y(-6.4), 0.42 * U);
   for (let k = 0; k < 10; k++) {
     const a = (k / 10) * Math.PI * 2;
@@ -478,9 +494,12 @@ const drawWaxSeal = (ctx) => {
   centeredText(ctx, fontCaps(24), 'LT', X(5.9), Y(-6.4));
 };
 
-const engraved = (alpha, draw) => (ctx) => withAlpha(ctx, alpha, () => draw(ctx));
+const engraved =
+  (alpha: number, draw: (ctx: Ctx) => void) =>
+  (ctx: Ctx): void =>
+    withAlpha(ctx, alpha, () => draw(ctx));
 
-export const DECORATIONS = {
+export const DECORATIONS: Record<ChapterId, (ctx: Ctx) => void> = {
   laurentius: engraved(0.75, (ctx) => {
     ctx.lineWidth = 1.4;
     drawFineQuill(ctx, -6.4, -6.2, 1.15, 0.42);

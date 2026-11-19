@@ -1,17 +1,17 @@
-import { CHAPTERS } from '../../data/chapters.js';
-import { ART_SIZE, X, Y, createCanvas, goldStroke, sparkle } from './canvas.js';
-import { ENGRAVINGS, drawRingFrame } from './engravings.js';
-import { DECORATIONS } from './decorations.js';
+import { CHAPTERS } from '../../data/chapters';
+import { ART_SIZE, X, Y, createCanvas, get2d, goldStroke, sparkle } from './canvas';
+import { ENGRAVINGS, drawRingFrame } from './engravings';
+import { DECORATIONS } from './decorations';
 
-const artCanvases = [];
-const sheetArtCache = {};
+const artCanvases: (HTMLCanvasElement | undefined)[] = [];
+const sheetArtCache: Record<number, string> = {};
 
-export const hasAllChapterArt = () => artCanvases.filter(Boolean).length === CHAPTERS.length;
+export const hasAllChapterArt = (): boolean => artCanvases.filter(Boolean).length === CHAPTERS.length;
 
-export const drawChapterArt = (index) => {
+export const drawChapterArt = (index: number): HTMLCanvasElement => {
   const chapter = CHAPTERS[index];
   const canvas = createCanvas(ART_SIZE, ART_SIZE);
-  const ctx = canvas.getContext('2d');
+  const ctx = get2d(canvas);
   if (chapter.frame) drawRingFrame(ctx, chapter.frame.radius, chapter.frame.center);
   ENGRAVINGS[chapter.id](ctx);
   goldStroke(ctx, 1.3);
@@ -20,10 +20,10 @@ export const drawChapterArt = (index) => {
   return canvas;
 };
 
-export const chapterArtImageUrl = (index) => {
+export const chapterArtImageUrl = (index: number): string => {
   if (sheetArtCache[index]) return sheetArtCache[index];
   const canvas = createCanvas(ART_SIZE, ART_SIZE);
-  const ctx = canvas.getContext('2d');
+  const ctx = get2d(canvas);
   if (artCanvases[index]) ctx.drawImage(artCanvases[index], 0, 0);
   goldStroke(ctx, 2.4);
   const { points, edges } = CHAPTERS[index].figure;

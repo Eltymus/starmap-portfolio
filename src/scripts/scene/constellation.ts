@@ -1,9 +1,11 @@
 import * as THREE from 'three';
-import { random, clamp } from '../../lib/math.js';
-import { HEX } from '../../lib/theme.js';
-import { createStarGeometry, createStarMaterial, STAR_TYPE } from './star-points.js';
-import { createStripeTexture, createRingTexture } from './textures.js';
-import { buildPenTrails } from './trails.js';
+import { additiveMaterial } from './materials';
+import { random, clamp } from '../../lib/math';
+import { HEX } from '../../lib/theme';
+import type { Chapter, Figure } from '../../data/types';
+import { createStarGeometry, createStarMaterial, STAR_TYPE } from './star-points';
+import { createStripeTexture, createRingTexture } from './textures';
+import { buildPenTrails } from './trails';
 
 const DISTANCE = 40;
 const SCALE = 1.42;
@@ -17,16 +19,114 @@ const stripeTexture = createStripeTexture();
 const ringTexture = createRingTexture();
 const ribbonGeometry = new THREE.PlaneGeometry(1, 1);
 
-const fadeTo = (current, target, rate) => current + (target - current) * rate;
+const fadeTo = (current: number, target: number, rate: number): number => current + (target - current) * rate;
 
-const additiveMaterial = (options) =>
-  new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, ...options });
+type GlowMesh = THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>;
 
+/** A straight piece of a pen trail, with its position along the trail. */
+interface Segment {
+  a: THREE.Vector2;
+  b: THREE.Vector2;
+  /** Indices of the stars at either end. */
+  ia: number;
+  ib: number;
+  trail: number;
+  length: number;
+  /** Distance along the trail where this segment begins. */
+  start: number;
+  angle: number;
+  ribbon: GlowMesh;
+}
+
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  life: number;
+  size: number;
+}
+
+interface Ring {
+  mesh: GlowMesh;
+  /** Progress of the expanding ring, 0…1; 1 means idle. */
+  t: number;
+  big: number;
+}
+
+/** Where the pointer is, in viewport pixels. */
+export interface Pointer {
+  x: number;
+  y: number;
+}
+
+/** The star note under the pointer: screen position, text and chapter index. */
+export interface HoveredNote {
+  sx: number;
+  sy: number;
+  txt: string;
+  n: number;
+}
+
+export interface ConstellationFrame {
+  index: number;
+  isActive: boolean;
+  time: number;
+  dt: number;
+  camera: THREE.Camera;
+  canvasRect: DOMRect;
+  pointer: Pointer;
+}
+
+type PenPosition = readonly [x: number, y: number] | null;
+
+/**
+ * One chapter's constellation in the 3D sky: stars, the pen that draws the strokes,
+ * the engraving behind it, its label and the sparkle effects.
+ */
 export class Constellation {
-  constructor(chapter, direction, scene) {
+  private readonly figure: Figure;
+  private readonly notes: Chapter['starNotes'];
+  private readonly group = new THREE.Group();
+
+  private sizes!: Float32Array;
+  private baseSizes!: number[];
+  private starGeometry!: THREE.BufferGeometry;
+  private starMaterial!: THREE.ShaderMaterial;
+  private ignition!: Float32Array;
+  private flash!: Float32Array;
+  private lit!: Uint8Array;
+
+  private segments!: Segment[];
+  private totalLength!: number;
+  private trailCount!: number;
+  private linePositions!: Float32Array;
+  private lineGeometry!: THREE.BufferGeometry;
+  private lineMaterial!: THREE.LineBasicMaterial;
+  private glowMaterial!: THREE.MeshBasicMaterial;
+  private guide!: THREE.LineSegments<THREE.BufferGeometry, THREE.LineDashedMaterial>;
+
+  private art!: GlowMesh;
+  private label!: GlowMesh;
+  private pen!: THREE.Points<THREE.BufferGeometry, THREE.ShaderMaterial>;
+  private penPositions!: Float32Array;
+  private dust!: THREE.Points;
+  private dustPositions!: Float32Array;
+  private dustSizes!: Float32Array;
+  private particles!: Particle[];
+  private rings!: Ring[];
+
+  private drawn = 0;
+  private done = false;
+  private visited = false;
+  private hovered = -1;
+  private lastDrawn: number | undefined = undefined;
+  private sizesSettled = false;
+  private dustActive = false;
+
+  constructor(chapter: Chapter, direction: THREE.Vector3, scene: THREE.Scene) {
     this.figure = chapter.figure;
-    this.notes = chapter.starNotes || {};
-    this.group = new THREE.Group();
+    this.notes = chapter.starNotes;
     this.group.position.copy(direction).multiplyScalar(DISTANCE);
     this.group.lookAt(0, 0, 0);
     this.group.scale.setScalar(SCALE);
@@ -38,17 +138,9 @@ export class Constellation {
     this.createPen();
     this.createDust();
     this.createRings();
-
-    this.drawn = 0;
-    this.done = false;
-    this.visited = false;
-    this.hovered = -1;
-    this.lastDrawn = undefined;
-    this.sizesSettled = false;
-    this.dustActive = false;
   }
 
-  createStars() {
+  private createStars(): void {
     const { points } = this.figure;
     const count = points.length;
     const positions = new Float32Array(count * 3);
@@ -74,26 +166,30 @@ export class Constellation {
     this.lit = new Uint8Array(count);
   }
 
-  createStrokes() {
+  private createStrokes(): void {
     const { points } = this.figure;
     const trails = buildPenTrails(this.figure);
+    this.glowMaterial = additiveMaterial({ map: stripeTexture, color: HEX.gold, opacity: 0 });
     this.segments = [];
     this.totalLength = 0;
     trails.forEach((trail, trailIndex) => {
       let start = 0;
       trail.forEach((step) => {
-        const segment = {
-          a: new THREE.Vector2(points[step.a][0], points[step.a][1]),
-          b: new THREE.Vector2(points[step.b][0], points[step.b][1]),
+        const a = new THREE.Vector2(points[step.a][0], points[step.a][1]);
+        const b = new THREE.Vector2(points[step.b][0], points[step.b][1]);
+        const length = a.distanceTo(b);
+        this.segments.push({
+          a,
+          b,
           ia: step.a,
           ib: step.b,
-          trail: trailIndex
-        };
-        segment.length = segment.a.distanceTo(segment.b);
-        segment.start = start;
-        start += segment.length;
-        segment.angle = Math.atan2(segment.b.y - segment.a.y, segment.b.x - segment.a.x);
-        this.segments.push(segment);
+          trail: trailIndex,
+          length,
+          start,
+          angle: Math.atan2(b.y - a.y, b.x - a.x),
+          ribbon: new THREE.Mesh(ribbonGeometry, this.glowMaterial)
+        });
+        start += length;
       });
       this.totalLength = Math.max(this.totalLength, start);
     });
@@ -111,15 +207,13 @@ export class Constellation {
     });
     this.group.add(new THREE.LineSegments(this.lineGeometry, this.lineMaterial));
 
-    this.glowMaterial = additiveMaterial({ map: stripeTexture, color: HEX.gold, opacity: 0 });
     this.segments.forEach((segment) => {
-      segment.ribbon = new THREE.Mesh(ribbonGeometry, this.glowMaterial);
       segment.ribbon.rotation.z = segment.angle;
       segment.ribbon.visible = false;
       this.group.add(segment.ribbon);
     });
 
-    const guidePositions = [];
+    const guidePositions: number[] = [];
     this.segments.forEach((s) => guidePositions.push(s.a.x, s.a.y, 0, s.b.x, s.b.y, 0));
     this.guide = new THREE.LineSegments(
       new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(guidePositions, 3)),
@@ -129,7 +223,7 @@ export class Constellation {
     this.group.add(this.guide);
   }
 
-  createArtAndLabel(labelY) {
+  private createArtAndLabel(labelY: number): void {
     this.art = new THREE.Mesh(new THREE.PlaneGeometry(16, 16), additiveMaterial({ opacity: 0 }));
     this.art.position.z = -0.05;
     this.group.add(this.art);
@@ -138,11 +232,12 @@ export class Constellation {
     this.group.add(this.label);
   }
 
-  createPen() {
+  private createPen(): void {
     const count = this.trailCount;
+    this.penPositions = new Float32Array(count * 3).fill(OFFSCREEN);
     this.pen = new THREE.Points(
       createStarGeometry(
-        new Float32Array(count * 3).fill(OFFSCREEN),
+        this.penPositions,
         new Float32Array(count * 3).map((_, k) => [1, 0.92, 0.75][k % 3]),
         new Float32Array(count).fill(20),
         new Float32Array(count).fill(STAR_TYPE.cross)
@@ -152,7 +247,7 @@ export class Constellation {
     this.group.add(this.pen);
   }
 
-  createDust() {
+  private createDust(): void {
     this.dustPositions = new Float32Array(DUST_COUNT * 3).fill(OFFSCREEN);
     this.dustSizes = new Float32Array(DUST_COUNT);
     this.dust = new THREE.Points(
@@ -166,37 +261,35 @@ export class Constellation {
     );
     this.group.add(this.dust);
     this.particles = [];
-    for (let k = 0; k < DUST_COUNT; k++) this.particles.push({ x: 0, y: 0, vx: 0, vy: 0, life: 0 });
+    for (let k = 0; k < DUST_COUNT; k++) this.particles.push({ x: 0, y: 0, vx: 0, vy: 0, life: 0, size: 0 });
   }
 
-  createRings() {
+  private createRings(): void {
     this.rings = [];
     for (let k = 0; k < RING_COUNT; k++) {
       const mesh = new THREE.Mesh(ribbonGeometry, additiveMaterial({ map: ringTexture, opacity: 0 }));
       mesh.position.z = 0.06;
       this.group.add(mesh);
-      this.rings.push({ mesh, t: 1 });
+      this.rings.push({ mesh, t: 1, big: 1 });
     }
   }
 
-  setArt(artTexture, labelTexture) {
+  setArt(artTexture: THREE.Texture, labelTexture: THREE.Texture): void {
     this.art.material.map = artTexture;
     this.art.material.needsUpdate = true;
     this.label.material.map = labelTexture;
     this.label.material.needsUpdate = true;
   }
 
-  burst(x, y, big) {
+  private burst(x: number, y: number, big = false): void {
     const ring = this.rings.find((r) => r.t >= 1) || this.rings[0];
     ring.t = 0;
-    ring.x = x;
-    ring.y = y;
     ring.big = big ? 3.2 : 1;
     ring.mesh.position.x = x;
     ring.mesh.position.y = y;
   }
 
-  emitDust(x, y, count) {
+  private emitDust(x: number, y: number, count: number): void {
     for (let k = 0; k < count; k++) {
       const particle = this.particles.find((q) => q.life <= 0);
       if (!particle) return;
@@ -211,7 +304,7 @@ export class Constellation {
     }
   }
 
-  ignite(vertex, x, y, isActive, dustCount) {
+  private ignite(vertex: number, x: number, y: number, isActive: boolean, dustCount: number): void {
     this.lit[vertex] = 1;
     this.flash[vertex] = 1;
     if (isActive) {
@@ -220,7 +313,7 @@ export class Constellation {
     }
   }
 
-  updateStrokes(isActive, penPositions) {
+  private updateStrokes(isActive: boolean, penPositions: PenPosition[]): void {
     const drawn = this.drawn;
     const idle = !isActive && this.lastDrawn === drawn;
     this.lastDrawn = drawn;
@@ -243,7 +336,7 @@ export class Constellation {
     this.lineGeometry.attributes.position.needsUpdate = true;
   }
 
-  updateOpacities(isActive, index, time) {
+  private updateOpacities(isActive: boolean, index: number, time: number): void {
     const done = this.done;
     this.lineMaterial.opacity = fadeTo(this.lineMaterial.opacity, isActive ? 0.95 : this.visited ? 0.32 : 0, 0.06);
     this.glowMaterial.opacity = fadeTo(
@@ -273,7 +366,7 @@ export class Constellation {
     );
   }
 
-  updateStarSizes(isActive, time) {
+  private updateStarSizes(isActive: boolean, time: number): void {
     for (let v = 0; v < this.baseSizes.length; v++) {
       this.ignition[v] += ((this.lit[v] ? 1 : 0) - this.ignition[v]) * 0.12;
       this.flash[v] *= 0.94;
@@ -299,14 +392,14 @@ export class Constellation {
     this.sizesSettled = !moving;
   }
 
-  updatePen(isActive, penPositions) {
+  private updatePen(isActive: boolean, penPositions: PenPosition[]): void {
     const uniforms = this.pen.material.uniforms;
     const anyPen = isActive && penPositions.some((q) => q);
     if (!anyPen) {
       uniforms.uAlpha.value *= 0.85;
       return;
     }
-    const positions = this.pen.geometry.attributes.position.array;
+    const positions = this.penPositions;
     penPositions.forEach((q, k) => {
       if (q) {
         positions.set([q[0], q[1], 0.08], k * 3);
@@ -317,7 +410,7 @@ export class Constellation {
     uniforms.uAlpha.value += (1 - uniforms.uAlpha.value) * 0.3;
   }
 
-  updateDust(dt) {
+  private updateDust(dt: number): void {
     let anyDust = false;
     this.particles.forEach((p, k) => {
       if (p.life > 0) {
@@ -341,7 +434,7 @@ export class Constellation {
     this.dustActive = anyDust;
   }
 
-  updateRings(dt) {
+  private updateRings(dt: number): void {
     this.rings.forEach((ring) => {
       ring.mesh.visible = ring.t < 1;
     });
@@ -355,7 +448,7 @@ export class Constellation {
     });
   }
 
-  findHoveredNote(camera, rect, pointer, index) {
+  private findHoveredNote(camera: THREE.Camera, rect: DOMRect, pointer: Pointer, index: number): HoveredNote | null {
     for (const key in this.notes) {
       const v = +key;
       const projected = new THREE.Vector3(this.figure.points[v][0], this.figure.points[v][1], 0.05)
@@ -371,12 +464,13 @@ export class Constellation {
     return null;
   }
 
-  update({ index, isActive, time, dt, camera, canvasRect, pointer }) {
+  /** Advances one frame; returns the star note under the pointer, if any. */
+  update({ index, isActive, time, dt, camera, canvasRect, pointer }: ConstellationFrame): HoveredNote | null {
     if (isActive) {
       this.visited = true;
       this.drawn = Math.min(this.totalLength, this.drawn + dt * DRAW_SPEED);
     }
-    const penPositions = new Array(this.trailCount).fill(null);
+    const penPositions: PenPosition[] = new Array(this.trailCount).fill(null);
     this.updateStrokes(isActive, penPositions);
 
     const done = this.drawn >= this.totalLength - 1e-3;

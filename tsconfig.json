@@ -1,5 +1,12 @@
 {
-  "extends": "astro/tsconfigs/base",
+  // A file path rather than "astro/tsconfigs/strict": Vitest's resolver cannot follow the package export.
+  "extends": "./node_modules/astro/tsconfigs/strict.json",
+  "compilerOptions": {
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true
+  },
   "include": [".astro/types.d.ts", "**/*"],
   "exclude": ["dist"]
 }

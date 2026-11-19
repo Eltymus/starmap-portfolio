@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { CHAPTERS } from '../../src/data/chapters.js';
-import { buildPenTrails } from '../../src/scripts/scene/trails.js';
-
-type Figure = { points: number[][]; edges: number[][] };
+import { CHAPTERS } from '../../src/data/chapters';
+import type { Figure } from '../../src/data/types';
+import { buildPenTrails } from '../../src/scripts/scene/trails';
 
 const edgeKey = (a: number, b: number) => (a < b ? `${a}-${b}` : `${b}-${a}`);
 

@@ -1,7 +1,9 @@
-import { CHAPTERS } from '../../data/chapters.js';
-import { assetUrl } from '../../lib/assets.js';
-import { COLORS, fontCaps, fontMono } from '../../lib/theme.js';
+import type { ChapterId } from '../../data/types';
+import { CHAPTERS } from '../../data/chapters';
+import { assetUrl } from '../../lib/assets';
+import { COLORS, fontCaps, fontMono } from '../../lib/theme';
 import {
+  type Ctx,
   ART_CENTER as CENTER,
   UNIT as U,
   X,
@@ -11,7 +13,7 @@ import {
   circle,
   dotted,
   scatterSparkles
-} from './canvas.js';
+} from './canvas';
 
 const IMAGE_FILES = {
   mole: 'img/mole.png',
@@ -21,31 +23,40 @@ const IMAGE_FILES = {
   icosahedron: 'img/icosahedron.png',
   stairs: 'img/stairs.png',
   bird: 'img/bird.png'
-};
+} as const;
 
-const images = {};
+type ImageKey = keyof typeof IMAGE_FILES;
 
-export const loadEngravingImages = () => {
-  const waits = Object.entries(IMAGE_FILES).map(([key, file]) => {
+const images: Partial<Record<ImageKey, HTMLImageElement>> = {};
+
+export const loadEngravingImages = (): Promise<void[]> => {
+  const waits = (Object.keys(IMAGE_FILES) as ImageKey[]).map((key) => {
     const image = new Image();
-    image.src = assetUrl(file);
+    image.src = assetUrl(IMAGE_FILES[key]);
     images[key] = image;
-    return new Promise((resolve) => {
+    return new Promise<void>((resolve) => {
       if (image.complete) resolve();
       else {
-        image.onload = resolve;
-        image.onerror = resolve;
+        image.onload = () => resolve();
+        image.onerror = () => resolve();
       }
     });
   });
   return Promise.all(waits);
 };
 
-const drawImageWhenLoaded = (ctx, image, x, y, width, height) => {
+const drawImageWhenLoaded = (
+  ctx: Ctx,
+  image: HTMLImageElement | undefined,
+  x: number,
+  y: number,
+  width: number,
+  height: number
+): void => {
   if (image && image.complete && image.naturalWidth) ctx.drawImage(image, x, y, width, height);
 };
 
-export const drawRingFrame = (ctx, radius, center = [0, 0]) => {
+export const drawRingFrame = (ctx: Ctx, radius: number, center: readonly [number, number] = [0, 0]): void => {
   ctx.save();
   ctx.translate(center[0] * U, -center[1] * U);
   goldStroke(ctx, 2.6);
@@ -76,7 +87,7 @@ export const drawRingFrame = (ctx, radius, center = [0, 0]) => {
   ctx.restore();
 };
 
-const drawCompassRose = (ctx) => {
+const drawCompassRose = (ctx: Ctx): void => {
   ctx.save();
   ctx.lineWidth = 0.8;
   for (let k = 0; k < 32; k++) {
@@ -114,12 +125,14 @@ const drawCompassRose = (ctx) => {
   ctx.font = fontCaps(26);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  [
-    ['N', 0, 5.62],
-    ['E', 5.62, 0],
-    ['S', 0, -5.62],
-    ['W', -5.62, 0]
-  ].forEach(([letter, u, v]) => {
+  (
+    [
+      ['N', 0, 5.62],
+      ['E', 5.62, 0],
+      ['S', 0, -5.62],
+      ['W', -5.62, 0]
+    ] as const
+  ).forEach(([letter, u, v]) => {
     ctx.fillStyle = COLORS.navy;
     ctx.beginPath();
     ctx.arc(X(u), Y(v), 16, 0, 7);
@@ -130,7 +143,7 @@ const drawCompassRose = (ctx) => {
   ctx.restore();
 };
 
-const drawLaurelLeaf = (ctx, cx, cy, length, width, angle) => {
+const drawLaurelLeaf = (ctx: Ctx, cx: number, cy: number, length: number, width: number, angle: number): void => {
   ctx.save();
   ctx.translate(cx, cy);
   ctx.rotate(angle);
@@ -153,7 +166,7 @@ const drawLaurelLeaf = (ctx, cx, cy, length, width, angle) => {
   ctx.restore();
 };
 
-const drawLaurelBranch = (ctx, side) => {
+const drawLaurelBranch = (ctx: Ctx, side: 1 | -1): void => {
   const rx = 6.25 * U;
   const ry = 6.25 * U;
   const cy = CENTER;
@@ -193,7 +206,7 @@ const drawLaurelBranch = (ctx, side) => {
   );
 };
 
-const drawRibbonBow = (ctx) => {
+const drawRibbonBow = (ctx: Ctx): void => {
   ctx.lineWidth = 1.4;
   const by = Y(-6.3);
   ctx.beginPath();
@@ -212,7 +225,7 @@ const drawRibbonBow = (ctx) => {
   ctx.fill();
 };
 
-const laurentius = (ctx) => {
+const laurentius = (ctx: Ctx): void => {
   goldStroke(ctx, 2);
   circle(ctx, CENTER, CENTER, 5.9 * U);
   ctx.lineWidth = 1;
@@ -222,12 +235,12 @@ const laurentius = (ctx) => {
     if (i % 8 === 0) sparkle(ctx, CENTER + Math.cos(a) * 5.73 * U, CENTER + Math.sin(a) * 5.73 * U, 9);
   }
   drawCompassRose(ctx);
-  [-1, 1].forEach((side) => drawLaurelBranch(ctx, side));
+  ([-1, 1] as const).forEach((side) => drawLaurelBranch(ctx, side));
   drawRibbonBow(ctx);
   scatterSparkles(ctx, 10, 3);
 };
 
-const turin = (ctx) => {
+const turin = (ctx: Ctx): void => {
   const k = (9.6 / 1085) * U;
   drawImageWhenLoaded(
     ctx,
@@ -241,7 +254,7 @@ const turin = (ctx) => {
   scatterSparkles(ctx, 10, 7);
 };
 
-const stack = (ctx) => {
+const stack = (ctx: Ctx): void => {
   const k = 0.016 * U;
   drawImageWhenLoaded(ctx, images.computer, CENTER - 300 * k, CENTER - 295 * k, 600 * k, 590 * k);
   goldStroke(ctx, 1.4);
@@ -257,14 +270,14 @@ const stack = (ctx) => {
   scatterSparkles(ctx, 12, 11);
 };
 
-const siply = (ctx) => {
+const siply = (ctx: Ctx): void => {
   const k = (9.6 / 372) * U;
   drawImageWhenLoaded(ctx, images.grapes, CENTER - 155 * k, CENTER - 186 * k, 311 * k, 372 * k);
   goldStroke(ctx, 1.4);
   scatterSparkles(ctx, 12, 13);
 };
 
-const bookRelay = (ctx) => {
+const bookRelay = (ctx: Ctx): void => {
   const k = 0.0131 * 1.18 * U;
   drawImageWhenLoaded(ctx, images.book, CENTER - 397 * k, CENTER - 152 * k, 794 * k, 305 * k);
   goldStroke(ctx, 1.4);
@@ -282,7 +295,7 @@ const bookRelay = (ctx) => {
   scatterSparkles(ctx, 10, 17);
 };
 
-const tavern = (ctx) => {
+const tavern = (ctx: Ctx): void => {
   const k = (9 / 648) * U;
   drawImageWhenLoaded(ctx, images.icosahedron, CENTER - 321 * k, CENTER - 343 * k, 642 * k, 683 * k);
   goldStroke(ctx, 2);
@@ -303,14 +316,14 @@ const tavern = (ctx) => {
   scatterSparkles(ctx, 14, 19);
 };
 
-const climb = (ctx) => {
+const climb = (ctx: Ctx): void => {
   const k = (10 / 318) * U;
   drawImageWhenLoaded(ctx, images.stairs, CENTER - 201 * k, CENTER - 150 * k, 400 * k, 294 * k);
   goldStroke(ctx, 1.4);
   scatterSparkles(ctx, 12, 23);
 };
 
-const contact = (ctx) => {
+const contact = (ctx: Ctx): void => {
   const k = (11 / 641) * U;
   drawImageWhenLoaded(ctx, images.bird, CENTER - 320 * k, CENTER - 157 * k, 641 * k, 314 * k);
   drawImageWhenLoaded(ctx, images.bird, CENTER - 320 * k, CENTER - 157 * k, 641 * k, 314 * k);
@@ -318,7 +331,7 @@ const contact = (ctx) => {
   scatterSparkles(ctx, 12, 29);
 };
 
-export const ENGRAVINGS = {
+export const ENGRAVINGS: Record<ChapterId, (ctx: Ctx) => void> = {
   laurentius,
   turin,
   stack,

@@ -1,4 +1,14 @@
-export const bindKeyboard = ({ navigation, sheet, fullMap }) => {
+import type { ChartSheet } from './chart-sheet';
+import type { FullMap } from './full-map';
+import type { Navigation } from './navigation';
+
+interface KeyboardTargets {
+  navigation: Navigation;
+  sheet: ChartSheet;
+  fullMap: FullMap;
+}
+
+export const bindKeyboard = ({ navigation, sheet, fullMap }: KeyboardTargets): void => {
   window.addEventListener('keydown', (event) => {
     if (event.key === 'Tab' && (sheet.isOpen || fullMap.isOpen)) {
       (sheet.isOpen ? sheet : fullMap).trapTab(event);

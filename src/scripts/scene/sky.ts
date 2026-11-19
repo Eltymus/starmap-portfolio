@@ -1,8 +1,9 @@
 import * as THREE from 'three';
-import { random, gaussian } from '../../lib/math.js';
-import { HEX, STAR_TEMPERATURES } from '../../lib/theme.js';
-import { createStarCloud, STAR_TYPE } from './star-points.js';
-import { createHazeTexture, createStarNameTexture, createOrnamentTexture } from './textures.js';
+import { additiveMaterial } from './materials';
+import { random, gaussian } from '../../lib/math';
+import { HEX, STAR_TEMPERATURES } from '../../lib/theme';
+import { createStarCloud, STAR_TYPE } from './star-points';
+import { type OrnamentKind, createHazeTexture, createStarNameTexture, createOrnamentTexture } from './textures';
 
 const MILKY_WAY_TILT = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.55, 0, 0.4));
 const ECLIPTIC_TILT = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.41, 0.3, 0));
@@ -24,7 +25,12 @@ const NAMED_STARS = [
   'Regulus'
 ];
 
-const SKY_ORNAMENTS = [
+interface NamedStar {
+  label: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>;
+  name: string;
+}
+
+const SKY_ORNAMENTS: readonly { kind: OrnamentKind; azimuth: number; elevation: number; size: number }[] = [
   { kind: 'moon', azimuth: 0.05, elevation: 0.62, size: 13 },
   { kind: 'saturn', azimuth: -1.25, elevation: 0.55, size: 12 },
   { kind: 'comet', azimuth: -2.6, elevation: 0.62, size: 12 },
@@ -32,23 +38,20 @@ const SKY_ORNAMENTS = [
   { kind: 'saturn', azimuth: -4.9, elevation: -0.3, size: 9 }
 ];
 
-export const directionFromAngles = (azimuth, elevation) =>
+export const directionFromAngles = (azimuth: number, elevation: number): THREE.Vector3 =>
   new THREE.Vector3(
     Math.sin(azimuth) * Math.cos(elevation),
     Math.sin(elevation),
     -Math.cos(azimuth) * Math.cos(elevation)
   );
 
-const randomTemperature = () => STAR_TEMPERATURES[Math.floor(random() * STAR_TEMPERATURES.length)];
+const randomTemperature = (): number => STAR_TEMPERATURES[Math.floor(random() * STAR_TEMPERATURES.length)];
 
-const additiveMaterial = (options) =>
-  new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, ...options });
-
-const addStarFields = (sky) => {
+const addStarFields = (sky: THREE.Group): void => {
   sky.add(
     createStarCloud(
       5000,
-      (i, position, color) => {
+      (_i, position, color) => {
         position.set(gaussian(), gaussian(), gaussian()).normalize().multiplyScalar(110);
         color.setHSL(0.6 + random() * 0.08, 0.3, 0.75).multiplyScalar(0.35 + random() * 0.35);
         return 1.2 + random() * 1.3;
@@ -60,7 +63,7 @@ const addStarFields = (sky) => {
   sky.add(
     createStarCloud(
       9000,
-      (i, position, color) => {
+      (_i, position, color) => {
         const a = random() * Math.PI * 2;
         const spread = gaussian() * (0.1 + 0.06 * Math.sin(a * 3));
         position.set(Math.cos(a), spread, Math.sin(a)).normalize().multiplyScalar(105).applyQuaternion(MILKY_WAY_TILT);
@@ -74,7 +77,7 @@ const addStarFields = (sky) => {
   sky.add(
     createStarCloud(
       1400,
-      (i, position, color, star) => {
+      (_i, position, color, star) => {
         position.set(gaussian(), gaussian(), gaussian()).normalize().multiplyScalar(104);
         color.set(randomTemperature()).multiplyScalar(0.55 + random() * 0.3);
         star.type = STAR_TYPE.dot;
@@ -87,7 +90,7 @@ const addStarFields = (sky) => {
   sky.add(
     createStarCloud(
       320,
-      (i, position, color, star) => {
+      (_i, position, color, star) => {
         position.set(gaussian(), gaussian(), gaussian()).normalize().multiplyScalar(100);
         color.set(randomTemperature());
         star.type = random() < 0.55 ? STAR_TYPE.glint : random() < 0.7 ? STAR_TYPE.cross : STAR_TYPE.flare;
@@ -98,7 +101,7 @@ const addStarFields = (sky) => {
   );
 };
 
-const addMilkyWayHaze = (sky) => {
+const addMilkyWayHaze = (sky: THREE.Group): void => {
   const texture = createHazeTexture();
   for (let k = 0; k < 22; k++) {
     const a = (k / 22) * Math.PI * 2 + random() * 0.1;
@@ -122,7 +125,7 @@ const addMilkyWayHaze = (sky) => {
   }
 };
 
-const addOpenCluster = (sky) => {
+const addOpenCluster = (sky: THREE.Group): void => {
   const center = new THREE.Vector3(0.75, 0.42, 0.5).normalize();
   sky.add(
     createStarCloud(
@@ -141,7 +144,7 @@ const addOpenCluster = (sky) => {
   );
 };
 
-const addNamedStars = (sky) =>
+const addNamedStars = (sky: THREE.Group): NamedStar[] =>
   NAMED_STARS.map((name, k) => {
     const azimuth = (k / 12) * Math.PI * 2 + 0.37;
     const elevation = (k % 2 ? 1 : -1) * (0.38 + (k % 3) * 0.16) + (name === 'Polaris' ? 0.9 : 0);
@@ -149,7 +152,7 @@ const addNamedStars = (sky) =>
     sky.add(
       createStarCloud(
         1,
-        (i, position, color, star) => {
+        (_i, position, color, star) => {
           position.copy(direction).multiplyScalar(96);
           color.set(STAR_TEMPERATURES[k % STAR_TEMPERATURES.length]);
           star.type = STAR_TYPE.flare;
@@ -167,16 +170,16 @@ const addNamedStars = (sky) =>
     return { label, name };
   });
 
-const ringPoints = (radius, rotation, segments) => {
-  const points = [];
-  for (let i = 0; i <= (segments || 180); i++) {
-    const a = (i / (segments || 180)) * Math.PI * 2;
+const ringPoints = (radius: number, rotation: THREE.Quaternion, segments = 180): THREE.BufferGeometry => {
+  const points: THREE.Vector3[] = [];
+  for (let i = 0; i <= segments; i++) {
+    const a = (i / segments) * Math.PI * 2;
     points.push(new THREE.Vector3(Math.cos(a) * radius, 0, Math.sin(a) * radius).applyQuaternion(rotation));
   }
   return new THREE.BufferGeometry().setFromPoints(points);
 };
 
-const addCelestialGrid = (sky) => {
+const addCelestialGrid = (sky: THREE.Group): void => {
   const gridMaterial = new THREE.LineDashedMaterial({
     color: HEX.gold,
     dashSize: 0.9,
@@ -197,7 +200,7 @@ const addCelestialGrid = (sky) => {
   }
   [-60, -30, 0, 30, 60].forEach((degrees) => {
     const latitude = (degrees * Math.PI) / 180;
-    const points = [];
+    const points: THREE.Vector3[] = [];
     for (let i = 0; i <= 180; i++) {
       const a = (i / 180) * Math.PI * 2;
       points.push(
@@ -214,14 +217,14 @@ const addCelestialGrid = (sky) => {
   });
 };
 
-const addEcliptic = (sky) => {
+const addEcliptic = (sky: THREE.Group): void => {
   sky.add(
     new THREE.Line(
       ringPoints(ECLIPTIC_RADIUS, ECLIPTIC_TILT, 360),
       new THREE.LineBasicMaterial({ color: HEX.gold, transparent: true, opacity: 0.22 })
     )
   );
-  const ticks = [];
+  const ticks: THREE.Vector3[] = [];
   for (let i = 0; i < 72; i++) {
     const a = (i / 72) * Math.PI * 2;
     const length = i % 6 ? 0.9 : 2.2;
@@ -247,7 +250,7 @@ const addEcliptic = (sky) => {
   );
 };
 
-export const createSky = (scene) => {
+export const createSky = (scene: THREE.Scene) => {
   const sky = new THREE.Group();
   scene.add(sky);
   addStarFields(sky);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clamp, easeInOutCubic, gaussian, seededRandom } from '../../src/lib/math.js';
+import { clamp, easeInOutCubic, gaussian, seededRandom } from '../../src/lib/math';
 
 describe('clamp', () => {
   it('keeps values inside the range', () => {

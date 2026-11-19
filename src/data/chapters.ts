@@ -1,4 +1,6 @@
-export const CHAPTERS = [
+import type { Chapter } from './types';
+
+export const CHAPTERS: readonly Chapter[] = [
   {
     id: 'laurentius',
     name: 'Laurentius',
@@ -506,7 +508,7 @@ export const CHAPTERS = [
 
 export const CHAPTER_COUNT = CHAPTERS.length;
 
-export const chapterSkyAngles = (index) => ({
+export const chapterSkyAngles = (index: number): { azimuth: number; elevation: number } => ({
   azimuth: -index * 0.74 + 0.2,
   elevation: 0.12 + 0.2 * Math.sin(index * 1.4)
 });

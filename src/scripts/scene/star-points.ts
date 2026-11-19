@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { random } from '../../lib/math.js';
+import { random } from '../../lib/math';
 
 const VERTEX_SHADER = `attribute vec3 aColor; attribute float aSize; attribute float aPhase; attribute float aType;
     uniform float uTime; uniform float uPR; uniform float uTw; uniform float uMax;
@@ -27,25 +27,47 @@ const FRAGMENT_SHADER = `uniform float uAlpha; uniform float uFlare; varying vec
       float a = clamp(g + rays + rg + core, 0.0, 1.0) * uAlpha * vT; if (a < 0.003) discard;
       gl_FragColor = vec4(vC * (1.0 + core * 0.7), a); }`;
 
-export const STAR_TYPE = { dot: 0, glint: 1, cross: 2, flare: 3 };
+export const STAR_TYPE = { dot: 0, glint: 1, cross: 2, flare: 3 } as const;
 
-const materials = [];
+export type StarType = (typeof STAR_TYPE)[keyof typeof STAR_TYPE];
+
+export interface StarMaterialOptions {
+  twinkle?: number;
+  maxSize?: number;
+  alpha?: number;
+  flare?: number;
+}
+
+/** Mutable per-star settings that `createStarCloud` callbacks may change. */
+export interface StarSettings {
+  type: StarType;
+}
+
+/** Places star `i`: sets its position and colour and returns its size. */
+export type PlaceStar = (i: number, position: THREE.Vector3, color: THREE.Color, star: StarSettings) => number;
+
+const materials: THREE.ShaderMaterial[] = [];
 let pixelRatio = 1;
 
-export const setStarPixelRatio = (value) => {
+export const setStarPixelRatio = (value: number): void => {
   pixelRatio = value;
   materials.forEach((material) => {
     material.uniforms.uPR.value = value;
   });
 };
 
-export const setStarTime = (time) => {
+export const setStarTime = (time: number): void => {
   materials.forEach((material) => {
     material.uniforms.uTime.value = time;
   });
 };
 
-export const createStarMaterial = ({ twinkle = 0.35, maxSize = 40, alpha = 1, flare = 0 } = {}) => {
+export const createStarMaterial = ({
+  twinkle = 0.35,
+  maxSize = 40,
+  alpha = 1,
+  flare = 0
+}: StarMaterialOptions = {}): THREE.ShaderMaterial => {
   const material = new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 },
@@ -65,7 +87,12 @@ export const createStarMaterial = ({ twinkle = 0.35, maxSize = 40, alpha = 1, fl
   return material;
 };
 
-export const createStarGeometry = (positions, colors, sizes, types) => {
+export const createStarGeometry = (
+  positions: Float32Array,
+  colors: Float32Array,
+  sizes: Float32Array,
+  types?: Float32Array
+): THREE.BufferGeometry => {
   const count = positions.length / 3;
   const phases = new Float32Array(count);
   for (let i = 0; i < count; i++) phases[i] = random();
@@ -78,14 +105,18 @@ export const createStarGeometry = (positions, colors, sizes, types) => {
   return geometry;
 };
 
-export const createStarCloud = (count, placeStar, materialOptions) => {
+export const createStarCloud = (
+  count: number,
+  placeStar: PlaceStar,
+  materialOptions?: StarMaterialOptions
+): THREE.Points => {
   const positions = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
   const sizes = new Float32Array(count);
   const types = new Float32Array(count);
   const position = new THREE.Vector3();
   const color = new THREE.Color();
-  const star = { type: STAR_TYPE.glint };
+  const star: StarSettings = { type: STAR_TYPE.glint };
   for (let i = 0; i < count; i++) {
     star.type = STAR_TYPE.glint;
     sizes[i] = placeStar(i, position, color, star);

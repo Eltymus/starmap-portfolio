@@ -1,15 +1,24 @@
 import * as THREE from 'three';
-import { CHAPTERS, CHAPTER_COUNT, chapterSkyAngles } from '../../data/chapters.js';
-import { clamp, easeInOutCubic } from '../../lib/math.js';
-import { formatSkyCoordinates } from '../../lib/sky-coordinates.js';
-import { drawChapterArt } from '../art/chapter-art.js';
-import { loadEngravingImages } from '../art/engravings.js';
-import { state } from '../state.js';
-import { Constellation } from './constellation.js';
-import { createShootingStar } from './shooting-star.js';
-import { createSky, directionFromAngles } from './sky.js';
-import { setStarPixelRatio, setStarTime } from './star-points.js';
-import { createConstellationLabelTexture } from './textures.js';
+import { CHAPTERS, CHAPTER_COUNT, chapterSkyAngles } from '../../data/chapters';
+import { clamp, easeInOutCubic } from '../../lib/math';
+import { formatSkyCoordinates } from '../../lib/sky-coordinates';
+import { drawChapterArt } from '../art/chapter-art';
+import { loadEngravingImages } from '../art/engravings';
+import { state } from '../state';
+import { Constellation, type HoveredNote } from './constellation';
+import { createShootingStar } from './shooting-star';
+import { createSky, directionFromAngles } from './sky';
+import { setStarPixelRatio, setStarTime } from './star-points';
+import { createConstellationLabelTexture } from './textures';
+
+export interface SkySceneOptions {
+  canvas: HTMLCanvasElement;
+  coordsElement: HTMLElement;
+  /** Called every frame with the star note under the pointer, or null. */
+  onHover: (hover: HoveredNote | null) => void;
+  /** Called once, after the first frame has been rendered. */
+  onStart: () => void;
+}
 
 const UP = new THREE.Vector3(0, 1, 0);
 const ORIGIN = new THREE.Vector3();
@@ -23,10 +32,10 @@ const preferredPixelRatio = () => {
   return Math.min(device, pixels > 2.2e6 ? 1 : pixels > 1.3e6 ? 1.25 : 1.5);
 };
 
-const createAdaptiveResolution = (renderer, getSize) => {
+const createAdaptiveResolution = (renderer: THREE.WebGLRenderer, getSize: () => { width: number; height: number }) => {
   let averageFrame = 16;
   let elapsed = 0;
-  return (dt) => {
+  return (dt: number): void => {
     averageFrame = averageFrame * 0.95 + dt * 0.05;
     elapsed += dt;
     if (elapsed <= 1500) return;
@@ -44,7 +53,7 @@ const createAdaptiveResolution = (renderer, getSize) => {
   };
 };
 
-export const startSkyScene = ({ canvas, coordsElement, onHover, onStart }) => {
+export const startSkyScene = ({ canvas, coordsElement, onHover, onStart }: SkySceneOptions): void => {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: false,
@@ -106,7 +115,7 @@ export const startSkyScene = ({ canvas, coordsElement, onHover, onStart }) => {
   let started = false;
   let coordsElapsed = 0;
 
-  const frame = (time) => {
+  const frame = (time: number): void => {
     const dt = Math.min(50, time - (lastTime || time));
     lastTime = time;
     setStarTime(time);

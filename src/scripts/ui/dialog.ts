@@ -1,16 +1,24 @@
 const OPEN_CLASS = 'is-open';
 
-const tabbableElements = (root) =>
-  [...root.querySelectorAll('button:not([disabled]), a[href], [tabindex="0"]')].filter(
+const tabbableElements = (root: HTMLElement) =>
+  [...root.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], [tabindex="0"]')].filter(
     (element) => element.getClientRects().length && getComputedStyle(element).visibility !== 'hidden'
   );
 
-export const createDialog = (root, initialFocus) => {
+export interface Dialog {
+  root: HTMLElement;
+  open: () => void;
+  close: () => void;
+  trapTab: (event: KeyboardEvent) => void;
+  readonly isOpen: boolean;
+}
+
+export const createDialog = (root: HTMLElement, initialFocus: HTMLElement): Dialog => {
   let isOpen = false;
-  let returnFocus = null;
+  let returnFocus: HTMLElement | null = null;
 
   const open = () => {
-    returnFocus = document.activeElement;
+    returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     root.classList.add(OPEN_CLASS);
     root.setAttribute('aria-hidden', 'false');
     isOpen = true;
@@ -32,7 +40,7 @@ export const createDialog = (root, initialFocus) => {
     returnFocus = null;
   };
 
-  const trapTab = (event) => {
+  const trapTab = (event: KeyboardEvent) => {
     const focusable = tabbableElements(root);
     if (!focusable.length) return;
     const first = focusable[0];

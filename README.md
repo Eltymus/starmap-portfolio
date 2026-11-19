@@ -2,7 +2,7 @@
 
 Personal portfolio of **Lorenzo Tripodi** — a gold-on-navy star map in Three.js. Every section draws a constellation; each star holds a note, and "Open the chart" shows the full details.
 
-Built with [Astro](https://astro.build) (static output), [Tailwind CSS v4](https://tailwindcss.com) and [Three.js](https://threejs.org). Deployed for free on GitHub Pages.
+Built with [Astro](https://astro.build) (static output) and strict TypeScript, [Tailwind CSS v4](https://tailwindcss.com) and [Three.js](https://threejs.org). Deployed for free on GitHub Pages.
 
 ## Run locally
 
@@ -31,12 +31,13 @@ Screenshot baselines live in `tests/e2e/__screenshots__/`, one set per platform.
 
 | Path                     | What                                                                                                                              |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| `src/data/chapters.js`   | All content, one object per chapter: name, subtitle, star notes, chart-sheet page, constellation geometry and layout tweaks       |
+| `src/data/chapters.ts`   | All content, one object per chapter: name, subtitle, star notes, chart-sheet page, constellation geometry and layout tweaks       |
+| `src/data/types.ts`      | Types of the content (`Chapter`, `Sheet`, `Figure`): a misspelt or missing field fails the build                                  |
 | `src/pages/index.astro`  | The page: the text of every section, composed from components                                                                     |
 | `src/components/`        | Reusable Astro pieces: `Chapter` (section + card), `Button`, `Link`, `Chips`, `StackList`, `Timeline`, dialogs, moon nav, header… |
 | `src/layouts/Base.astro` | `<head>`, fonts (self-hosted via Fontsource)                                                                                      |
 | `src/lib/`               | Shared helpers: asset URLs, math, colour palette and canvas fonts                                                                 |
-| `src/scripts/starmap.js` | Entry point that wires the UI and the 3D scene together                                                                           |
+| `src/scripts/starmap.ts` | Entry point that wires the UI and the 3D scene together                                                                           |
 | `src/scripts/ui/`        | Navigation, chart sheet, full map, star tooltip, keyboard, shared dialog behaviour                                                |
 | `src/scripts/scene/`     | Three.js: renderer loop, sky, star shader, constellations, shooting star, textures                                                |
 | `src/scripts/art/`       | Canvas engravings: drawing primitives, the engraving and decorations of each chapter                                              |
@@ -45,10 +46,10 @@ Screenshot baselines live in `tests/e2e/__screenshots__/`, one set per platform.
 
 ### Common edits
 
-- **Change a colour or font**: `src/styles/tokens.css` (CSS) and `src/lib/theme.js` (canvas / SVG drawn in JS).
+- **Change a colour or font**: `src/styles/tokens.css` (CSS) and `src/lib/theme.ts` (canvas / SVG drawn in JS).
 - **Change a section's text**: `src/pages/index.astro`.
-- **Change a chart sheet, star notes or a constellation**: the chapter's object in `src/data/chapters.js`.
-- **Change a chapter's engraving**: the function with the chapter `id` in `src/scripts/art/engravings.js` and `decorations.js`.
+- **Change a chart sheet, star notes or a constellation**: the chapter's object in `src/data/chapters.ts`.
+- **Change a chapter's engraving**: the function with the chapter `id` in `src/scripts/art/engravings.ts` and `decorations.ts`.
 
 ## Deploy (GitHub Pages)
 

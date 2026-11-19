@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CHAPTERS, CHAPTER_COUNT, chapterSkyAngles } from '../../src/data/chapters.js';
+import { CHAPTERS, CHAPTER_COUNT, chapterSkyAngles } from '../../src/data/chapters';
 
 describe('chapter data', () => {
   it('has unique ids', () => {
@@ -56,8 +56,8 @@ describe('chapter data', () => {
 
 describe('chapter art', () => {
   it('has an engraving and decorations for every chapter', async () => {
-    const { ENGRAVINGS } = await import('../../src/scripts/art/engravings.js');
-    const { DECORATIONS } = await import('../../src/scripts/art/decorations.js');
+    const { ENGRAVINGS } = await import('../../src/scripts/art/engravings');
+    const { DECORATIONS } = await import('../../src/scripts/art/decorations');
     CHAPTERS.forEach(({ id }) => {
       expect(ENGRAVINGS).toHaveProperty(id);
       expect(DECORATIONS).toHaveProperty(id);
