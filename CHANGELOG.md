@@ -6,6 +6,8 @@ All notable changes to this project are listed here. The format follows
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-11-20
+
 ### Changed
 
 - The 3D sky starts in short tasks instead of one long one: the browser gets the main thread back between steps,
@@ -64,6 +66,7 @@ All notable changes to this project are listed here. The format follows
 - Accessibility: native `<dialog>` elements, star notes readable by keyboard and screen readers, reduced-motion
   support and axe-core scans.
 
-[Unreleased]: https://github.com/Eltymus/starmap-portfolio/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/Eltymus/starmap-portfolio/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/Eltymus/starmap-portfolio/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/Eltymus/starmap-portfolio/compare/4bef5f1...v1.1.0
 [1.0.0]: https://github.com/Eltymus/starmap-portfolio/tree/4bef5f1
