@@ -21,12 +21,14 @@ Deployed to GitHub Pages by a CI pipeline that publishes only when every check p
 ## Highlights
 
 - **Performance.** The page script is 39 kB (15 kB gzip); Three.js and the scene (561 kB, 139 kB gzip) load afterwards
-  with a dynamic `import()`, so the text never waits for WebGL. Engravings are lossless WebP, the main fonts are
-  preloaded and self-hosted.
-- **Lighthouse** (live site, Lighthouse 13.6, November 2026). Accessibility, Best Practices and SEO 100 on both mobile
-  and desktop. Performance 68 on mobile and 70 on desktop, with LCP 1.2 s / 0.3 s and no layout shift. The points are
-  lost on Total Blocking Time: building the 3D sky and compiling its shaders for the first frame runs on the main
-  thread, and headless Chrome does it on a software GPU. To reproduce:
+  with a dynamic `import()`, so the text never waits for WebGL. The sky then starts in short tasks: the browser gets
+  the main thread back between steps, shaders compile in parallel before the first frame, and the engravings are drawn
+  one at a time. Engravings are lossless WebP, the main fonts are preloaded and self-hosted.
+- **Lighthouse** (live site, Lighthouse 13.6, November 2026, three runs). Accessibility, Best Practices and SEO 100 on
+  mobile and desktop. Performance about 70 on mobile and 65–68 on desktop, with LCP 1.1 s / 0.3 s and no layout
+  shift. The points are lost on Total Blocking Time. Splitting the start-up brought it down by about a third, but the
+  creation of the WebGL context remains: a single synchronous call that is slow in Lighthouse's headless, software-GPU
+  Chrome. [docs/architecture.md](docs/architecture.md#trade-offs-worth-knowing) explains why it stays. To reproduce:
   `npx lighthouse https://eltymus.github.io/starmap-portfolio/`.
 - **Resilience.** Without WebGL the page shows a static sky and keeps working; if the GPU drops the WebGL context, the
   render loop pauses and resumes when it comes back. Both paths are tested.
@@ -34,7 +36,7 @@ Deployed to GitHub Pages by a CI pipeline that publishes only when every check p
   `<meta>` tag; an end-to-end test walks through the whole site and fails on any violation.
 - **Accessibility.** Native `<dialog>`s with focus management, every hover note also reachable by keyboard and screen
   reader, `prefers-reduced-motion` honoured down to the 3D scene, axe-core scans in CI.
-- **Tested end to end.** 85 unit tests (Vitest) for the pure logic — pen-stroke ordering, sky coordinates, content data —
+- **Tested end to end.** 87 unit tests (Vitest) for the pure logic — pen-stroke ordering, sky coordinates, content data —
   and 83 Playwright runs on desktop and mobile: navigation, dialogs, keyboard, SEO, CSP, WebGL fallback and screenshot
   comparisons, run in the same Linux container locally and in CI.
 - **Maintained.** Strict TypeScript, ESLint, Stylelint and Prettier gate every commit; Dependabot keeps dependencies
