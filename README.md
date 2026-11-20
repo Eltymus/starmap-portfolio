@@ -1,12 +1,45 @@
 # Starmap portfolio
 
-Personal portfolio of **Lorenzo Tripodi** — a gold-on-navy star map in Three.js. Every section draws a constellation; each star holds a note, and "Open the chart" shows the full details.
+[![CI](https://github.com/Eltymus/starmap-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/Eltymus/starmap-portfolio/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-e2be74.svg)](LICENSE)
 
-Built with [Astro](https://astro.build) (static output), strict TypeScript, plain CSS and [Three.js](https://threejs.org). Deployed for free on GitHub Pages.
+**Live: [eltymus.github.io/starmap-portfolio](https://eltymus.github.io/starmap-portfolio/)**
+
+Personal portfolio of **Lorenzo Tripodi** — a gold-on-navy star map in Three.js. Every section draws a constellation over
+an engraving; each star holds a note, and "Open the chart" shows the full details.
+
+Built with [Astro](https://astro.build) (static output), strict TypeScript, plain CSS and [Three.js](https://threejs.org).
+Deployed to GitHub Pages by a CI pipeline that publishes only when every check passes.
+
+![The opening chapter: name, portrait and the compass-rose constellation](docs/images/star-map.webp)
+
+<p>
+  <img src="docs/images/project-chapter.webp" alt="A project chapter: the Siply card beside its grape-cluster constellation" width="49%" />
+  <img src="docs/images/chart-sheet.webp" alt="The chart sheet of a project, with role, highlights and tools" width="49%" />
+</p>
+
+## Highlights
+
+- **Performance.** The page script is 39 kB (15 kB gzip); Three.js and the scene (561 kB, 139 kB gzip) load afterwards
+  with a dynamic `import()`, so the text never waits for WebGL. Engravings are lossless WebP, the main fonts are
+  preloaded and self-hosted.
+- **Resilience.** Without WebGL the page shows a static sky and keeps working; if the GPU drops the WebGL context, the
+  render loop pauses and resumes when it comes back. Both paths are tested.
+- **Security without headers.** GitHub Pages cannot set headers, so a strict Content-Security-Policy ships as a
+  `<meta>` tag; an end-to-end test walks through the whole site and fails on any violation.
+- **Accessibility.** Native `<dialog>`s with focus management, every hover note also reachable by keyboard and screen
+  reader, `prefers-reduced-motion` honoured down to the 3D scene, axe-core scans in CI.
+- **Tested end to end.** 85 unit tests (Vitest) for the pure logic — pen-stroke ordering, sky coordinates, content data —
+  and 83 Playwright runs on desktop and mobile: navigation, dialogs, keyboard, SEO, CSP, WebGL fallback and screenshot
+  comparisons, run in the same Linux container locally and in CI.
+- **Maintained.** Strict TypeScript, ESLint, Stylelint and Prettier gate every commit; Dependabot keeps dependencies
+  current; `npm audit` is clean; commits follow Conventional Commits and changes are logged in `CHANGELOG.md`.
+- **Search and sharing.** Canonical URLs, Open Graph and Twitter cards with a share image rendered from the real sky,
+  a schema.org `Person` in JSON-LD, a sitemap and a themed 404 page.
 
 ## Run locally
 
-Requires Node 22 (`.nvmrc`; `nvm use` picks it up), the version CI uses.
+Requires Node 22.23.4 or later in the 22 line (`.nvmrc`; `nvm use` picks it up), the version CI uses.
 
 ```bash
 npm install
@@ -54,6 +87,7 @@ Screenshot baselines live in `tests/e2e/__screenshots__/`, one set per platform.
 | `src/scripts/scene/`     | Three.js: renderer loop, sky, star shader, constellations, shooting star, textures                                                |
 | `src/scripts/art/`       | Canvas engravings: drawing primitives, the engraving and decorations of each chapter                                              |
 | `src/styles/`            | One CSS file per component, imported in order by `global.css`; colours, fonts and easings live in `tokens.css`                    |
+| `docs/images/`           | Screenshots used in this README (not deployed)                                                                                    |
 | `public/img/`            | Gold engravings behind the constellations and the portrait                                                                        |
 
 ### Common edits
