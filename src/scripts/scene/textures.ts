@@ -74,14 +74,14 @@ export const createConstellationLabelTexture = (name: string, subtitle: string):
 };
 
 const ORNAMENT_DRAWINGS: Record<OrnamentKind, (ctx: Ctx) => void> = {
-  // An engraving (Flammarion, Astronomie populaire); blank until the image has loaded.
+  // An engraving (Flammarion, Les Terres du ciel); blank until the image has loaded.
   saturn: (ctx) => {
     const image = loadedImage('saturn');
     if (!image) return;
     const height = (480 * image.naturalHeight) / image.naturalWidth;
     ctx.save();
     ctx.translate(256, 256);
-    ctx.rotate(-0.2);
+    ctx.rotate(-0.05);
     ctx.drawImage(image, -240, -height / 2, 480, height);
     ctx.restore();
   },

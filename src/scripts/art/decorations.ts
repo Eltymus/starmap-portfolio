@@ -138,8 +138,9 @@ const drawBookplate = (ctx: Ctx): void => {
   drawImageCentered(ctx, 'bookplate', -5.6, 5.7, 3.8);
   ctx.save();
   ctx.translate(X(-5.6), Y(5.7));
-  centeredText(ctx, fontCaps(22), 'EX LIBRIS', 0, -0.28 * U);
-  centeredText(ctx, fontClassic(30, 'italic 600'), 'L. T.', 0, 0.24 * U);
+  // The cartouche's opening sits below the middle of the image, under its top flourish.
+  centeredText(ctx, fontCaps(22), 'EX LIBRIS', 0, 0.07 * U);
+  centeredText(ctx, fontClassic(30, 'italic 600'), 'L. T.', 0, 0.59 * U);
   ctx.restore();
 };
 

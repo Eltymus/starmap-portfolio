@@ -149,8 +149,8 @@ If the GitHub username or repo name changes, update `site` and `base` in `astro.
 ## Image credits
 
 Engravings are public domain, traced in gold: Mole Antonelliana (image provided by the author), Leonardo da Vinci's icosahedron (Pacioli, _De divina proportione_, 1509), grapes (_The Cultivation of the Native Grape_, 1868), stair (_Stair-Building_), open book (Nodier, _The Bibliomaniac_, 1894), bird with letter (chapbook _History of Birds_, c. 1830); the 90s computer is an Openclipart drawing (public domain).
-The smaller engravings around the constellations (`public/img/decor/`) are public domain too: Saturn (Flammarion,
-_Astronomie populaire_, 1880), Monviso from the Po valley, the Basilica of Superga and the bridge over the Po by the Gran
+The smaller engravings around the constellations (`public/img/decor/`) are public domain too: Saturn (Flammarion, _Les Terres du ciel_,
+1884), Monviso from the Po valley, the Basilica of Superga and the bridge over the Po by the Gran
 Madre (19th-century Italian woodcuts, Wikimedia Commons); the barrel, corkscrew, books, quill and inkwell, bookplate
 frame, beer stein, flask, dragon, telescope and laurel wreath are Openclipart drawings (CC0).
 
