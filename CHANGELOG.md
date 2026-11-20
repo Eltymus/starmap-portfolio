@@ -21,6 +21,8 @@ All notable changes to this project are listed here. The format follows
 
 ### Changed
 
+- Astro 5 → 7 (Vite 8), which clears every `npm audit` advisory (sharp/libvips, zod, esbuild); Node 22.23.4 or later
+  is now required.
 - three.js 0.128 → 0.187, with colour management kept off so the palette renders as before.
 - The 3D scene loads with a dynamic `import()`: the page script drops to 38 kB and the text no longer waits for
   three.js.
