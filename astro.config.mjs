@@ -1,10 +1,10 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
-// GitHub Pages: https://<user>.github.io/<repo>/
+// GitHub Pages with a custom domain (public/CNAME, DNS on Cloudflare): the site is served from the root.
 export default defineConfig({
-  site: 'https://eltymus.github.io',
-  base: '/starmap-portfolio',
+  site: 'https://lorenzotripodi.org',
+  base: '/',
   trailingSlash: 'always',
   integrations: [sitemap()],
   // Every stylesheet is a file, never an inline <style>: the Content-Security-Policy (src/lib/csp.ts) relies on it.

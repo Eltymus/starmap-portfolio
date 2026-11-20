@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { MISSING_PAGE } from './fixtures';
 
-const SITE = 'https://eltymus.github.io/starmap-portfolio/';
+const SITE = 'https://lorenzotripodi.org/';
 
 test.describe('sharing and search', () => {
   test('the home page has a canonical URL, Open Graph and Twitter cards', async ({ page }) => {
@@ -63,7 +63,7 @@ test.describe('404 page', () => {
   test('leads back to the star map', async ({ page }) => {
     await page.goto(MISSING_PAGE);
     await page.getByRole('link', { name: 'BACK TO THE STAR MAP' }).click();
-    await expect(page).toHaveURL(/\/starmap-portfolio\/$/);
+    await expect(page).toHaveURL(/^http:\/\/localhost:\d+\/$/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Lorenzo Tripodi');
   });
 });

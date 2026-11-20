@@ -8,6 +8,9 @@ All notable changes to this project are listed here. The format follows
 
 ### Changed
 
+- The site moves to its own domain, [lorenzotripodi.org](https://lorenzotripodi.org/), served from the root instead
+  of `eltymus.github.io/starmap-portfolio/`; canonical URLs, Open Graph tags, the sitemap and `robots.txt` follow.
+
 - The line drawings around the constellations are now public-domain engravings in gold, in the style of the
   constellations themselves: Monviso, Superga and the Po bridge for Turin; barrel and corkscrew for Siply; books, quill
   and bookplate for Book Relay; beer stein, flask and dragon for TavernVTT; telescope and laurel wreath for The climb.

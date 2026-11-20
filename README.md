@@ -3,7 +3,7 @@
 [![CI](https://github.com/Eltymus/starmap-portfolio/actions/workflows/ci.yml/badge.svg)](https://github.com/Eltymus/starmap-portfolio/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-e2be74.svg)](LICENSE)
 
-**Live: [eltymus.github.io/starmap-portfolio](https://eltymus.github.io/starmap-portfolio/)**
+**Live: [lorenzotripodi.org](https://lorenzotripodi.org/)**
 
 Personal portfolio of **Lorenzo Tripodi** — a gold-on-navy star map in Three.js. Every section draws a constellation over
 an engraving; each star holds a note, and "Open the chart" shows the full details.
@@ -29,7 +29,7 @@ Deployed to GitHub Pages by a CI pipeline that publishes only when every check p
   shift. The points are lost on Total Blocking Time. Splitting the start-up brought it down by about a third, but the
   creation of the WebGL context remains: a single synchronous call that is slow in Lighthouse's headless, software-GPU
   Chrome. [docs/architecture.md](docs/architecture.md#trade-offs-worth-knowing) explains why it stays. To reproduce:
-  `npx lighthouse https://eltymus.github.io/starmap-portfolio/`.
+  `npx lighthouse https://lorenzotripodi.org/`.
 - **Resilience.** Without WebGL the page shows a static sky and keeps working; if the GPU drops the WebGL context, the
   render loop pauses and resumes when it comes back. Both paths are tested.
 - **Security without headers.** GitHub Pages cannot set headers, so a strict Content-Security-Policy ships as a
@@ -50,7 +50,7 @@ Requires Node 22.23.4 or later in the 22 line (`.nvmrc`; `nvm use` picks it up),
 
 ```bash
 npm install
-npm run dev        # http://localhost:4321/starmap-portfolio/
+npm run dev        # http://localhost:4321/
 npm run build      # static site in dist/
 npm run preview
 ```
@@ -120,9 +120,8 @@ in [docs/architecture.md](docs/architecture.md).
 
 - Every page has a canonical URL, Open Graph and Twitter card tags; the share image is `public/og-image.jpg`.
 - The home page describes the author as a schema.org `Person` (name, role, city, GitHub and LinkedIn from `src/data/chapters.ts`).
-- `@astrojs/sitemap` writes `sitemap-index.xml` at build time; `public/robots.txt` points to it. On a project site
-  (`<user>.github.io/<repo>/`) crawlers only read the `robots.txt` at the domain root, so the sitemap is also linked from
-  `<head>` and can be submitted in Google Search Console.
+- `@astrojs/sitemap` writes `sitemap-index.xml` at build time; `public/robots.txt`, served at the domain root, points
+  to it. The sitemap is also linked from `<head>` and can be submitted in Google Search Console.
 
 ## Security
 
@@ -142,9 +141,15 @@ Notable changes go in `CHANGELOG.md` under **Unreleased**. Run `npm run verify` 
 
 1. Push to the `main` branch of `github.com/<user>/starmap-portfolio`.
 2. On GitHub: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
-3. The workflow in `.github/workflows/ci.yml` runs lint, type check, unit and end-to-end tests on every push and pull request; on `main`, only when they all pass, it builds and publishes to `https://<user>.github.io/starmap-portfolio/`.
+3. The workflow in `.github/workflows/ci.yml` runs lint, type check, unit and end-to-end tests on every push and pull request; on `main`, only when they all pass, it builds and publishes to `https://lorenzotripodi.org/`.
 
-If the GitHub username or repo name changes, update `site` and `base` in `astro.config.mjs`.
+### Custom domain
+
+The domain `lorenzotripodi.org` is registered on Cloudflare, with DNS only (no proxy, so GitHub can issue the HTTPS
+certificate): four `A` records for the apex to GitHub Pages (`185.199.108.153`–`185.199.111.153`) and a `CNAME` from
+`www` to `<user>.github.io`. On GitHub, **Settings → Pages → Custom domain** is `lorenzotripodi.org` with
+**Enforce HTTPS** on; `public/CNAME` holds the same name. To change domain, update the DNS, that setting,
+`public/CNAME`, `site` in `astro.config.mjs`, `public/robots.txt` and `SITE` in `tests/e2e/seo.spec.ts`.
 
 ## Image credits
 

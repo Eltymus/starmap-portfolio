@@ -8,7 +8,7 @@ import sharp from 'sharp';
 
 const DIST = 'dist';
 const ORIGIN = 'http://og.local';
-const BASE = '/starmap-portfolio/';
+const BASE = '/';
 const OUTPUT = 'public/og-image.jpg';
 const SIZE = { width: 1200, height: 630 };
 const TYPES = {

@@ -123,8 +123,9 @@ the context through `WEBGL_lose_context` and checks that pixels are drawn again.
   WebSocket.
   `build.inlineStylesheets: 'never'` keeps every stylesheet an external file, and `tests/e2e/security.spec.ts` fails
   on any violation.
-- **A project sub-path.** The site lives under `/starmap-portfolio/`, so every asset URL goes through
-  `src/lib/assets.ts` (`import.meta.env.BASE_URL`), and URLs always end with a slash, as Pages serves them.
+- **A custom domain.** The site is served from the root of `lorenzotripodi.org` (`public/CNAME`). Every asset URL
+  still goes through `src/lib/assets.ts` (`import.meta.env.BASE_URL`), so moving back under a sub-path only takes
+  `base` in `astro.config.mjs`; URLs always end with a slash, as Pages serves them.
 - **A 404 page.** `src/pages/404.astro` becomes `404.html`, which Pages serves for any missing address.
 
 ## Testing strategy
