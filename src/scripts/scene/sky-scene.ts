@@ -4,6 +4,7 @@ import { CHAPTERS, CHAPTER_COUNT, chapterSkyAngles } from '../../data/chapters';
 import { clamp, easeInOutCubic } from '../../lib/math';
 import { prefersReducedMotion } from '../../lib/motion';
 import { formatSkyCoordinates } from '../../lib/sky-coordinates';
+import { yieldToMain } from '../../lib/yield';
 import { drawAllChapterArt, whenArtAssetsReady } from '../art/art-assets';
 import { state } from '../state';
 import { Constellation, type HoveredNote } from './constellation';
@@ -59,10 +60,14 @@ const createAdaptiveResolution = (renderer: THREE.WebGLRenderer, getSize: () => 
 };
 
 /**
- * Starts the 3D sky on the canvas. Throws if WebGL is not available (the renderer cannot get a context):
+ * Starts the 3D sky on the canvas. Rejects if WebGL is not available (the renderer cannot get a context):
  * the caller shows a static sky instead.
+ *
+ * The start-up is split into short tasks so that the page stays responsive while the sky is built: the browser gets
+ * the main thread back between steps, shaders compile in parallel (`compileAsync`) before the frame that first needs
+ * them, and the engravings are drawn one per task.
  */
-export const startSkyScene = ({
+export const startSkyScene = async ({
   canvas,
   coordsElement,
   onHover,
@@ -70,7 +75,7 @@ export const startSkyScene = ({
   onArtReady,
   onContextLost,
   onContextRestored
-}: SkySceneOptions): void => {
+}: SkySceneOptions): Promise<void> => {
   const renderer = new THREE.WebGLRenderer({
     canvas,
     antialias: false,
@@ -93,31 +98,53 @@ export const startSkyScene = ({
   };
   new ResizeObserver(fit).observe(canvas);
   fit();
+  await yieldToMain();
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(56, 1, 0.1, 500);
   const { paintStarNames, addOrnaments } = createSky(scene);
+  await yieldToMain();
 
   const directions = CHAPTERS.map((_, i) => {
     const { azimuth, elevation } = chapterSkyAngles(i);
     return directionFromAngles(azimuth, elevation);
   });
   const constellations = CHAPTERS.map((chapter, i) => new Constellation(chapter, directions[i], scene));
-
-  whenArtAssetsReady().then(() => {
-    drawAllChapterArt().forEach((art, i) => {
-      constellations[i].setArt(
-        new THREE.CanvasTexture(art),
-        createConstellationLabelTexture(CHAPTERS[i].name, CHAPTERS[i].subtitle)
-      );
-    });
-    paintStarNames();
-    onArtReady?.();
-  });
-
   addOrnaments();
   const updateShootingStar = createShootingStar(scene);
   const updateResolution = createAdaptiveResolution(renderer, () => ({ width, height }));
+  await yieldToMain();
+
+  // While a compile is pending, frames skip rendering: drawing a material whose shader is still compiling would block
+  // the main thread until it is done. The canvas keeps showing the last frame meanwhile.
+  let pendingCompiles = 0;
+  const compileShaders = async () => {
+    pendingCompiles++;
+    try {
+      await renderer.compileAsync(scene, camera);
+    } finally {
+      pendingCompiles = Math.max(0, pendingCompiles - 1);
+    }
+  };
+
+  // The engravings come after the first frame. Each one is drawn in its own task while the sky keeps moving; then
+  // they are swapped in together, and the frames wait for the one new shader they need. (A texture goes to the GPU
+  // when its constellation first comes into view, so those uploads are spread out by themselves.)
+  const addChapterArt = async () => {
+    await whenArtAssetsReady();
+    const textures: [art: THREE.Texture, label: THREE.Texture][] = [];
+    await drawAllChapterArt((art, i) =>
+      textures.push([
+        new THREE.CanvasTexture(art),
+        createConstellationLabelTexture(CHAPTERS[i].name, CHAPTERS[i].subtitle)
+      ])
+    );
+    await yieldToMain();
+    textures.forEach(([art, label], i) => constellations[i].setArt(art, label));
+    paintStarNames();
+    await compileShaders();
+    onArtReady?.();
+  };
 
   const viewDirection = new THREE.Vector3();
   const lookMatrix = new THREE.Matrix4();
@@ -186,7 +213,7 @@ export const startSkyScene = ({
     camera.updateProjectionMatrix();
 
     updateResolution(dt);
-    renderer.render(scene, camera);
+    if (pendingCompiles === 0) renderer.render(scene, camera);
 
     coordsElapsed += dt;
     if (coordsElapsed > 120) {
@@ -200,17 +227,29 @@ export const startSkyScene = ({
     frameRequest = requestAnimationFrame(frame);
   };
 
+  const startLoop = () => {
+    cancelAnimationFrame(frameRequest);
+    frameRequest = requestAnimationFrame(frame);
+  };
+
   // three already calls preventDefault() on a lost context, which allows it to be restored, and rebuilds
   // its GPU state (buffers, textures, shaders) on restore. Here: stop the loop meanwhile, then resume it.
+  let contextLost = false;
   canvas.addEventListener('webglcontextlost', () => {
+    contextLost = true;
     cancelAnimationFrame(frameRequest);
     onContextLost?.();
   });
   canvas.addEventListener('webglcontextrestored', () => {
+    contextLost = false;
     lastTime = 0;
+    // A compile that was pending when the context went away may never report back: draw again regardless.
+    pendingCompiles = 0;
     onContextRestored?.();
-    frameRequest = requestAnimationFrame(frame);
+    startLoop();
   });
 
-  frameRequest = requestAnimationFrame(frame);
+  await compileShaders();
+  if (!contextLost) startLoop();
+  void addChapterArt();
 };

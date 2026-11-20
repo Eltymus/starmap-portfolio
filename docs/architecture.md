@@ -52,10 +52,17 @@ structured data cannot drift from what the page shows.
 
 1. It wires the UI first (navigation, chart sheet, full map, keyboard), so the page is usable straight away.
 2. It imports `./scene/sky-scene`. When the chunk arrives, `startSkyScene` creates the renderer, builds the sky and
-   starts the `requestAnimationFrame` loop. After the first frame, the intro splash fades out.
-3. Meanwhile `whenArtAssetsReady()` waits for the engraving images and the fonts the art is lettered in, with a
-   2.5 s cap so that a slow font never holds the art back. Every engraving is then drawn once, and
-   `data-art-ready` is set on `<html>`, a stable signal that the end-to-end tests wait for.
+   the constellations, compiles every shader with `renderer.compileAsync`, and only then starts the
+   `requestAnimationFrame` loop. After the first frame, the intro splash fades out.
+3. `whenArtAssetsReady()` waits for the engraving images and the fonts the art is lettered in, with a 2.5 s cap so
+   that a slow font never holds the art back. The engravings are then drawn, and `data-art-ready` is set on
+   `<html>`, a stable signal that the end-to-end tests wait for.
+
+Each of these steps is a separate task: `yieldToMain()` (`src/lib/yield.ts`, `scheduler.yield()` where available)
+hands the main thread back to the browser between them, and the engravings are drawn one chapter per task. With
+`KHR_parallel_shader_compile` the driver compiles shaders in the background; frames skip rendering while a compile
+is pending, because drawing a material whose shader is not ready would block until it is. The engraving textures
+reach the GPU when their constellation first comes into view, so those uploads spread out by themselves.
 
 ## UI and scene: one shared state object
 
@@ -138,8 +145,10 @@ the context through `WEBGL_lose_context` and checks that pixels are drawn again.
 - **Scene chunk size.** Three.js's renderer alone is over the default 500 kB warning, so the limit is raised to
   600 kB in `astro.config.mjs`. The chunk is off the critical path; tree-shaking Three.js further would mean giving
   up the `import * as THREE` style for little gain.
-- **Main-thread start-up.** Building the sky and compiling its shaders for the first frame is the largest task on
-  the main thread, and it is what Lighthouse's Total Blocking Time measures. Moving shader compilation off the first
-  frame (`renderer.compileAsync`) is the obvious next step.
+- **Main-thread start-up.** Splitting the start-up into short tasks cut Lighthouse's Total Blocking Time on mobile by
+  about a third (2.5 s → 1.7 s on the same build). Most of what is left is the creation of the WebGL context, a
+  single synchronous call that Chrome makes slow in Lighthouse's environment (the same constructor takes under
+  20 ms on its own). Removing it would mean moving the whole scene into a worker with `OffscreenCanvas`, which the
+  engravings, shared as DOM canvases with the chart sheet, make a large change for a small gain.
 - **TypeScript 6, not 7.** `@astrojs/check` and typescript-eslint do not support TypeScript 7 yet. Dependabot is
   told to skip its majors until they do.

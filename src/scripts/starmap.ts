@@ -37,10 +37,9 @@ export function startStarMap(): void {
     console.warn('3D sky unavailable, showing a static one instead.', error);
     showStaticSky(true);
     intro.classList.add('is-done');
-    whenArtAssetsReady().then(() => {
-      drawAllChapterArt();
-      markArtReady();
-    });
+    whenArtAssetsReady()
+      .then(() => drawAllChapterArt())
+      .then(markArtReady);
   };
 
   // Three.js and the scene come in a separate chunk, loaded after the text is on screen.

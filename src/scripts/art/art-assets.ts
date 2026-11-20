@@ -1,4 +1,5 @@
 import { CHAPTERS } from '../../data/chapters';
+import { yieldToMain } from '../../lib/yield';
 import { drawChapterArt } from './chapter-art';
 import { loadEngravingImages } from './engravings';
 
@@ -17,5 +18,18 @@ export const whenArtAssetsReady = (): Promise<void> => {
   return Promise.race([loaded, timeout]);
 };
 
-/** Draws every chapter's engraving: the 3D sky, the chart sheet and the full map all read them. */
-export const drawAllChapterArt = (): HTMLCanvasElement[] => CHAPTERS.map((_, index) => drawChapterArt(index));
+/**
+ * Draws every chapter's engraving (the 3D sky, the chart sheet and the full map all read them), one chapter per
+ * task so that drawing them never blocks the page for long. `onDrawn` runs right after each one.
+ */
+export const drawAllChapterArt = async (
+  onDrawn?: (art: HTMLCanvasElement, index: number) => void
+): Promise<HTMLCanvasElement[]> => {
+  const canvases: HTMLCanvasElement[] = [];
+  for (let index = 0; index < CHAPTERS.length; index++) {
+    await yieldToMain();
+    canvases.push(drawChapterArt(index));
+    onDrawn?.(canvases[index], index);
+  }
+  return canvases;
+};
