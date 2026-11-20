@@ -34,6 +34,10 @@ updates:
       # Types follow the Node version the site runs on (.nvmrc), not the newest Node.
       - dependency-name: '@types/node'
         update-types: ['version-update:semver-major']
+      # TypeScript 7 (the native port) has no JavaScript API yet: typescript-eslint supports < 6.1 and
+      # @astrojs/check < 7. Lift this once both accept it.
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: github-actions
     directory: /
