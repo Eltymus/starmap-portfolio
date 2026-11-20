@@ -6,6 +6,8 @@ All notable changes to this project are listed here. The format follows
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-11-20
+
 ### Added
 
 - Share cards: canonical URL, Open Graph and Twitter `summary_large_image` tags, and a 1200×630 share image drawn from the
@@ -18,6 +20,8 @@ All notable changes to this project are listed here. The format follows
   lost; the page keeps working and the intro closes.
 - Dependabot for npm and GitHub Actions, `engines` and `.nvmrc` pinned to Node 22.
 - MIT license for the source code, this changelog.
+- README opening with the live link, screenshots, highlights and Lighthouse scores; an architecture overview in
+  `docs/architecture.md`.
 
 ### Changed
 
@@ -53,5 +57,6 @@ All notable changes to this project are listed here. The format follows
 - Accessibility: native `<dialog>` elements, star notes readable by keyboard and screen readers, reduced-motion
   support and axe-core scans.
 
-[Unreleased]: https://github.com/Eltymus/starmap-portfolio/compare/4bef5f1...HEAD
+[Unreleased]: https://github.com/Eltymus/starmap-portfolio/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/Eltymus/starmap-portfolio/compare/4bef5f1...v1.1.0
 [1.0.0]: https://github.com/Eltymus/starmap-portfolio/tree/4bef5f1
