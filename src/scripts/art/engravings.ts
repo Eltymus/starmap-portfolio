@@ -22,12 +22,54 @@ const IMAGE_FILES = {
   book: 'img/book.webp',
   icosahedron: 'img/icosahedron.webp',
   stairs: 'img/stairs.webp',
-  bird: 'img/bird.webp'
+  bird: 'img/bird.webp',
+  // The smaller engravings around the constellations, and Saturn in the sky.
+  alpsLeft: 'img/decor/alps-left.webp',
+  alpsRight: 'img/decor/alps-right.webp',
+  superga: 'img/decor/superga.webp',
+  po: 'img/decor/po.webp',
+  barrel: 'img/decor/barrel.webp',
+  corkscrew: 'img/decor/corkscrew.webp',
+  books: 'img/decor/books.webp',
+  quill: 'img/decor/quill.webp',
+  bookplate: 'img/decor/bookplate.webp',
+  tankard: 'img/decor/tankard.webp',
+  flask: 'img/decor/flask.webp',
+  dragon: 'img/decor/dragon.webp',
+  telescope: 'img/decor/telescope.webp',
+  laurel: 'img/decor/laurel.webp',
+  saturn: 'img/decor/saturn.webp'
 } as const;
 
-type ImageKey = keyof typeof IMAGE_FILES;
+export type ImageKey = keyof typeof IMAGE_FILES;
 
 const images: Partial<Record<ImageKey, HTMLImageElement>> = {};
+
+/** The image once it has loaded, or undefined while it is missing. */
+export const loadedImage = (key: ImageKey): HTMLImageElement | undefined => {
+  const image = images[key];
+  return image && image.complete && image.naturalWidth ? image : undefined;
+};
+
+/** Draws an image centred on (cx, cy), in art units, `width` units wide and in its own proportions. */
+export const drawImageCentered = (
+  ctx: Ctx,
+  key: ImageKey,
+  cx: number,
+  cy: number,
+  width: number,
+  rotation = 0
+): void => {
+  const image = loadedImage(key);
+  if (!image) return;
+  const w = width * U;
+  const h = (w * image.naturalHeight) / image.naturalWidth;
+  ctx.save();
+  ctx.translate(X(cx), Y(cy));
+  ctx.rotate(rotation);
+  ctx.drawImage(image, -w / 2, -h / 2, w, h);
+  ctx.restore();
+};
 
 export const loadEngravingImages = (): Promise<void[]> => {
   const waits = (Object.keys(IMAGE_FILES) as ImageKey[]).map((key) => {
@@ -53,7 +95,7 @@ const drawImageWhenLoaded = (
   width: number,
   height: number
 ): void => {
-  if (image && image.complete && image.naturalWidth) ctx.drawImage(image, x, y, width, height);
+  if (image?.complete && image.naturalWidth) ctx.drawImage(image, x, y, width, height);
 };
 
 export const drawRingFrame = (ctx: Ctx, radius: number, center: readonly [number, number] = [0, 0]): void => {

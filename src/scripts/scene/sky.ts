@@ -6,9 +6,7 @@ import { createStarCloud, STAR_TYPE } from './star-points';
 import { type OrnamentKind, createHazeTexture, createStarNameTexture, createOrnamentTexture } from './textures';
 
 const MILKY_WAY_TILT = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.55, 0, 0.4));
-const ECLIPTIC_TILT = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.41, 0.3, 0));
 const GRID_RADIUS = 96;
-const ECLIPTIC_RADIUS = 94;
 
 const NAMED_STARS = [
   'Vega',
@@ -217,39 +215,6 @@ const addCelestialGrid = (sky: THREE.Group): void => {
   });
 };
 
-const addEcliptic = (sky: THREE.Group): void => {
-  sky.add(
-    new THREE.Line(
-      ringPoints(ECLIPTIC_RADIUS, ECLIPTIC_TILT, 360),
-      new THREE.LineBasicMaterial({ color: HEX.gold, transparent: true, opacity: 0.22 })
-    )
-  );
-  const ticks: THREE.Vector3[] = [];
-  for (let i = 0; i < 72; i++) {
-    const a = (i / 72) * Math.PI * 2;
-    const length = i % 6 ? 0.9 : 2.2;
-    const p = new THREE.Vector3(Math.cos(a), 0, Math.sin(a));
-    ticks.push(
-      p
-        .clone()
-        .multiplyScalar(ECLIPTIC_RADIUS)
-        .add(new THREE.Vector3(0, -length / 2, 0))
-        .applyQuaternion(ECLIPTIC_TILT),
-      p
-        .clone()
-        .multiplyScalar(ECLIPTIC_RADIUS)
-        .add(new THREE.Vector3(0, length / 2, 0))
-        .applyQuaternion(ECLIPTIC_TILT)
-    );
-  }
-  sky.add(
-    new THREE.LineSegments(
-      new THREE.BufferGeometry().setFromPoints(ticks),
-      new THREE.LineBasicMaterial({ color: HEX.gold, transparent: true, opacity: 0.22 })
-    )
-  );
-};
-
 export const createSky = (scene: THREE.Scene) => {
   const sky = new THREE.Group();
   scene.add(sky);
@@ -258,7 +223,6 @@ export const createSky = (scene: THREE.Scene) => {
   addOpenCluster(sky);
   const namedStars = addNamedStars(sky);
   addCelestialGrid(sky);
-  addEcliptic(sky);
 
   const paintStarNames = () => {
     namedStars.forEach(({ label, name }) => {
@@ -268,17 +232,29 @@ export const createSky = (scene: THREE.Scene) => {
     });
   };
 
+  const ornaments: { kind: OrnamentKind; material: THREE.MeshBasicMaterial }[] = [];
+
   const addOrnaments = () => {
     SKY_ORNAMENTS.forEach(({ kind, azimuth, elevation, size }) => {
-      const ornament = new THREE.Mesh(
-        new THREE.PlaneGeometry(size, size),
-        additiveMaterial({ map: createOrnamentTexture(kind), opacity: 0.55 })
-      );
+      const material = additiveMaterial({ map: createOrnamentTexture(kind), opacity: 0.55 });
+      ornaments.push({ kind, material });
+      const ornament = new THREE.Mesh(new THREE.PlaneGeometry(size, size), material);
       ornament.position.copy(directionFromAngles(azimuth, elevation)).multiplyScalar(60);
       ornament.lookAt(0, 0, 0);
       sky.add(ornament);
     });
   };
 
-  return { sky, paintStarNames, addOrnaments };
+  /** Repaints the ornaments drawn from engravings (Saturn) once the images have loaded. */
+  const paintOrnamentImages = () => {
+    ornaments
+      .filter(({ kind }) => kind === 'saturn')
+      .forEach(({ material }) => {
+        material.map?.dispose();
+        material.map = createOrnamentTexture('saturn');
+        material.needsUpdate = true;
+      });
+  };
+
+  return { sky, paintStarNames, addOrnaments, paintOrnamentImages };
 };

@@ -102,7 +102,7 @@ export const startSkyScene = async ({
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(56, 1, 0.1, 500);
-  const { paintStarNames, addOrnaments } = createSky(scene);
+  const { paintStarNames, addOrnaments, paintOrnamentImages } = createSky(scene);
   await yieldToMain();
 
   const directions = CHAPTERS.map((_, i) => {
@@ -142,6 +142,7 @@ export const startSkyScene = async ({
     await yieldToMain();
     textures.forEach(([art, label], i) => constellations[i].setArt(art, label));
     paintStarNames();
+    paintOrnamentImages();
     await compileShaders();
     onArtReady?.();
   };

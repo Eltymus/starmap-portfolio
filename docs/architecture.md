@@ -79,7 +79,7 @@ which is also what lets the UI run unchanged when there is no scene at all.
   screens. An adaptive resolution step lowers the pixel ratio when frames take longer than about 21 ms and raises it
   again when there is headroom.
 - **`sky.ts`**: the background: star fields with temperature-tinted colours, Milky Way haze, an open cluster, named
-  stars, the celestial grid and the ecliptic.
+  stars, the celestial grid, and the sky ornaments (Saturn is an engraving, repainted once its image loads).
 - **`star-points.ts`**: one `ShaderMaterial` for every star, with dot, glint, cross and flare shapes, twinkling and
   pixel-ratio-aware sizes. Buffers rewritten every frame are marked `DynamicDrawUsage`.
 - **`constellation.ts`**: one class per chapter: its stars, the gold engraving behind them, its label, and a pen that
@@ -93,8 +93,8 @@ designed in linear output, as r128 rendered it, and this keeps it identical.
 
 ## Engravings: drawn once, used three times
 
-`src/scripts/art/` draws each chapter's engraving on a 2D canvas, combining the WebP images in `public/img/` with
-hand-drawn gold strokes, frames and decorations. Each engraving is drawn once and reused:
+`src/scripts/art/` draws each chapter's engraving on a 2D canvas, combining the WebP images in `public/img/` (the main
+engravings) and `public/img/decor/` (the smaller ones around each constellation) with gold strokes, frames and lettering. Each engraving is drawn once and reused:
 
 - as a `CanvasTexture` behind the constellation in the 3D sky;
 - as a PNG data URL, with the figure stroked on top, for the chart sheet;

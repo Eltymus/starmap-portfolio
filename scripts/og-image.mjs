@@ -53,8 +53,9 @@ if (!existsSync(join(DIST, 'index.html'))) {
   process.exit(1);
 }
 
+// bypassCSP: the overlay is an injected <style>, which the page's Content-Security-Policy blocks.
 const browser = await chromium.launch();
-const page = await browser.newPage({ viewport: SIZE, deviceScaleFactor: 1, reducedMotion: 'reduce' });
+const page = await browser.newPage({ viewport: SIZE, deviceScaleFactor: 1, reducedMotion: 'reduce', bypassCSP: true });
 await page.route(`${ORIGIN}/**`, (route) => {
   let path = new URL(route.request().url()).pathname.replace(BASE, '/');
   if (path.endsWith('/')) path += 'index.html';

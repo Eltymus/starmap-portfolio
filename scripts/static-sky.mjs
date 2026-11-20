@@ -1,5 +1,5 @@
 // Draws public/img/static-sky.webp, the sky shown instead of the 3D one when WebGL is missing or lost:
-// the same ingredients (stars of several temperatures, Milky Way haze, celestial grid, gold ecliptic),
+// the same ingredients (stars of several temperatures, Milky Way haze, celestial grid),
 // flat and seeded, so every run gives the same picture. Transparent: the page background shows through.
 // Run with `npm run static-sky`.
 import sharp from 'sharp';
@@ -54,20 +54,6 @@ for (let k = 0; k < 5; k++) {
 parts.push(
   `<path d="${grid.join(' ')}" fill="none" stroke="${GOLD}" stroke-width="1" stroke-dasharray="7 7" opacity="0.09" />`
 );
-
-// The ecliptic: a gold arc with tick marks.
-const ecliptic = (t) => [t * WIDTH, HEIGHT * 0.2 + Math.sin(t * Math.PI) * -60 + t * HEIGHT * 0.12];
-const eclipticPath = Array.from({ length: 49 }, (_, k) => ecliptic(k / 48));
-parts.push(
-  `<path d="M${eclipticPath.map(([x, y]) => `${f(x)} ${f(y)}`).join(' L')}" fill="none" stroke="${GOLD}" stroke-width="1.2" opacity="0.22" />`
-);
-const ticks = [];
-for (let k = 0; k <= 72; k++) {
-  const [x, y] = ecliptic(k / 72);
-  const half = k % 6 ? 4 : 10;
-  ticks.push(`M${f(x)} ${f(y - half)} L${f(x)} ${f(y + half)}`);
-}
-parts.push(`<path d="${ticks.join(' ')}" stroke="${GOLD}" stroke-width="1" opacity="0.22" />`);
 
 // Dust of faint stars everywhere, denser along the Milky Way.
 for (let k = 0; k < 1500; k++) {

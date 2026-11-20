@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { COLORS, fontCaps, fontClassic } from '../../lib/theme';
 import { type Ctx, createCanvas, get2d, goldStroke, sparkle, circle } from '../art/canvas';
+import { loadedImage } from '../art/engravings';
 
 export type OrnamentKind = 'saturn' | 'moon' | 'comet' | 'sun';
 
@@ -73,18 +74,16 @@ export const createConstellationLabelTexture = (name: string, subtitle: string):
 };
 
 const ORNAMENT_DRAWINGS: Record<OrnamentKind, (ctx: Ctx) => void> = {
+  // An engraving (Flammarion, Astronomie populaire); blank until the image has loaded.
   saturn: (ctx) => {
-    circle(ctx, 256, 256, 90);
-    ctx.lineWidth = 1.5;
-    for (let i = -60; i <= 60; i += 30) {
-      ctx.beginPath();
-      ctx.ellipse(256, 256 + i, Math.sqrt(90 * 90 - i * i), 10, 0, 0, Math.PI);
-      ctx.stroke();
-    }
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.ellipse(256, 256, 200, 48, -0.35, 0.15, Math.PI * 2 - 0.15 + Math.PI * 0);
-    ctx.stroke();
+    const image = loadedImage('saturn');
+    if (!image) return;
+    const height = (480 * image.naturalHeight) / image.naturalWidth;
+    ctx.save();
+    ctx.translate(256, 256);
+    ctx.rotate(-0.2);
+    ctx.drawImage(image, -240, -height / 2, 480, height);
+    ctx.restore();
   },
   moon: (ctx) => {
     ctx.beginPath();

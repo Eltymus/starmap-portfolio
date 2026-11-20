@@ -6,6 +6,22 @@ All notable changes to this project are listed here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- The line drawings around the constellations are now public-domain engravings in gold, in the style of the
+  constellations themselves: Monviso, Superga and the Po bridge for Turin; barrel and corkscrew for Siply; books, quill
+  and bookplate for Book Relay; beer stein, flask and dragon for TavernVTT; telescope and laurel wreath for The climb.
+  Saturn in the sky is an engraving too. The 15 images (`public/img/decor/`) weigh 226 kB in all.
+
+### Removed
+
+- The ecliptic: the gold line with tick marks that crossed the sky and the constellations (also gone from the static
+  sky used without WebGL).
+
+### Fixed
+
+- `npm run og-image` works again: the page's Content-Security-Policy blocked the overlay the script injects.
+
 ## [1.1.1] - 2026-11-20
 
 ### Changed
