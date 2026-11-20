@@ -78,6 +78,9 @@ Screenshot baselines live in `tests/e2e/__screenshots__/`, one set per platform.
 
 ## Where things live
 
+How the pieces fit together (start-up, the shared state, the scene, the failure paths and the trade-offs) is explained
+in [docs/architecture.md](docs/architecture.md).
+
 | Path                     | What                                                                                                                              |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------- |
 | `src/data/chapters.ts`   | All content, one object per chapter: name, subtitle, star notes, chart-sheet page, constellation geometry and layout tweaks       |
