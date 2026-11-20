@@ -8,6 +8,9 @@ All notable changes to this project are listed here. The format follows
 
 ### Changed
 
+- Shorter copy: a new opening line ("Follow the stars to discover my story") with a matching **Follow the stars**
+  button, and tighter About me, Siply and Book Relay texts.
+
 - The site moves to its own domain, [lorenzotripodi.org](https://lorenzotripodi.org/), served from the root instead
   of `eltymus.github.io/starmap-portfolio/`; canonical URLs, Open Graph tags, the sitemap and `robots.txt` follow.
 
