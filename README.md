@@ -23,6 +23,11 @@ Deployed to GitHub Pages by a CI pipeline that publishes only when every check p
 - **Performance.** The page script is 39 kB (15 kB gzip); Three.js and the scene (561 kB, 139 kB gzip) load afterwards
   with a dynamic `import()`, so the text never waits for WebGL. Engravings are lossless WebP, the main fonts are
   preloaded and self-hosted.
+- **Lighthouse** (live site, Lighthouse 13.6, November 2026). Accessibility, Best Practices and SEO 100 on both mobile
+  and desktop. Performance 68 on mobile and 70 on desktop, with LCP 1.2 s / 0.3 s and no layout shift. The points are
+  lost on Total Blocking Time: building the 3D sky and compiling its shaders for the first frame runs on the main
+  thread, and headless Chrome does it on a software GPU. To reproduce:
+  `npx lighthouse https://eltymus.github.io/starmap-portfolio/`.
 - **Resilience.** Without WebGL the page shows a static sky and keeps working; if the GPU drops the WebGL context, the
   render loop pauses and resumes when it comes back. Both paths are tested.
 - **Security without headers.** GitHub Pages cannot set headers, so a strict Content-Security-Policy ships as a
