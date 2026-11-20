@@ -26,6 +26,11 @@ export function startStarMap(): void {
   bindKeyboard({ navigation, sheet: chartSheet, fullMap });
 
   const intro = byId('intro');
+  // Closing the intro also reveals the text, which waits hidden behind it (see intro.css).
+  const closeIntro = () => {
+    intro.classList.add('is-done');
+    document.documentElement.classList.add('intro-done');
+  };
   const canvas = byId<HTMLCanvasElement>('sky-canvas');
   const showStaticSky = createStaticSky(canvas);
   // A stable signal for tests and tooling that every engraving is in place.
@@ -36,7 +41,7 @@ export function startStarMap(): void {
   const fallBackToStaticSky = (error: unknown) => {
     console.warn('3D sky unavailable, showing a static one instead.', error);
     showStaticSky(true);
-    intro.classList.add('is-done');
+    closeIntro();
     whenArtAssetsReady()
       .then(() => drawAllChapterArt())
       .then(markArtReady);
@@ -52,7 +57,7 @@ export function startStarMap(): void {
           state.hoveredNote = hover;
           showStarTip(hover);
         },
-        onStart: () => setTimeout(() => intro.classList.add('is-done'), INTRO_HOLD),
+        onStart: () => setTimeout(closeIntro, INTRO_HOLD),
         onArtReady: markArtReady,
         onContextLost: () => showStaticSky(true),
         onContextRestored: () => showStaticSky(false)

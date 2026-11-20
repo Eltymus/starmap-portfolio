@@ -8,6 +8,9 @@ All notable changes to this project are listed here. The format follows
 
 ### Changed
 
+- The opening text no longer shows through the "Charting the sky" intro: the chapters stay hidden until it closes,
+  then fade in with the sky (after 6 s on their own if the script never runs).
+
 - Shorter copy: a new opening line ("Follow the stars to discover my story") with a matching **Follow the stars**
   button, and tighter About me, Siply and Book Relay texts.
 
